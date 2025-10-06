@@ -421,14 +421,14 @@ public class HelloApplication extends Application {
 
         alisSiyahisi.setOnAction(e -> {
             type = "FA";
-            tedarukcuCol.setText("findiq alisi");
+            tedarukcuCol.setText("Tədarükçü");
             loadPurchasesFromApi();
             primaryStage.setScene(tableScene);
         });
 
         satisSiyahisi.setOnAction(e -> {
             type = "QS";
-            tedarukcuCol.setText("qabiq satisi");
+            tedarukcuCol.setText("Alıcı");
             primaryStage.setScene(tableScene);
         });
 
@@ -510,6 +510,7 @@ public class HelloApplication extends Application {
 
                     System.out.println("Məlumat yadda saxlanıldı: Lot=" + lotNomresi + ", Nəqliyyat=" + neqliyyatNomresi);
                     primaryStage.setScene(tableScene);
+                    loadPurchasesFromApi();
                 });
 
                 task.setOnFailed(ev -> task.getException().printStackTrace());
@@ -815,10 +816,10 @@ public class HelloApplication extends Application {
         TableColumn<Purchase, String> anbarCol = new TableColumn<>("Anbar");
         anbarCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAnbar()));
         if (!"FA".equalsIgnoreCase(type)) {
-            tedarukcuCol = new TableColumn<>("findiq alisi");
+            tedarukcuCol = new TableColumn<>("Tədarükçü");
         }
         else if(!"QS".equalsIgnoreCase(type)){
-            tedarukcuCol = new TableColumn<>("qabiq satisi");
+            tedarukcuCol = new TableColumn<>("Alıcı");
         }
         tedarukcuCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTedarukcu()));
 
