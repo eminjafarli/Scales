@@ -8,37 +8,23 @@ Currently, the app supports only Azerbaijani, but English support will be added 
 
 ### 📌 Features
 
-Automated Weighing Process
+## Automated Weighing Process
 
-First measurement records the gross weight (container full).
+• First measurement records the gross weight (container full).
 
-Second measurement records the tare weight (empty container).
+• Second measurement records the tare weight (empty container).
 
-Final net weight is calculated automatically (gross – tare).
+• Final net weight is calculated automatically (gross – tare).
 
-Data Management
+## Data Management
 
-All transactions are stored in MS SQL Server.
+• All transactions are stored in MS SQL Server.
 
-Integrated form to enter and review purchase details.
+• Integrated form to enter and review purchase details.
 
-Receipt Generation
+• Receipt Generation
 
-A digital check/receipt is generated and provided to the buyer after weighing.
-
-Authentication & Security
-
-Secure login system with encrypted passwords.
-
-JWT-based authentication to protect API endpoints.
-
-User Interface
-
-Frontend built with JavaFX.
-
-Web/API powered by Spring Boot and REST API.
-
-Styled with Bootstrap for modern design.
+• A digital check/receipt is generated and provided to the buyer after weighing.
 
 ---
 
@@ -47,8 +33,6 @@ Styled with Bootstrap for modern design.
 Frontend (Desktop): JavaFX
 
 Backend: Spring Boot, Spring Data JPA, Spring Security, REST API
-
-Authentication: JWT, Encryption
 
 Database: Microsoft SQL Server (MS SQL)
 
@@ -76,14 +60,4 @@ ScalesAPI → Spring Boot REST API (handles authentication, data storage, and bu
 
 ### 📸 Example Workflow
 
-Operator fills in buyer + purchase details in the form.
-
-Scales automatically measure first weight (full).
-
-After unloading, scales measure second weight (empty).
-
-System subtracts values → calculates net weight.
-
-Transaction is saved in MS SQL Server.
-
-Buyer receives a printed purchase check.
+Video here
