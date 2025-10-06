@@ -1,4 +1,4 @@
-### SCALES
+## SCALES
 
 ⚖️ Scales is a system developed for an agricultural company to manage and complete purchases directly at the factory. The application integrates hardware scales with a digital system to automate the weighing process, record transactions, and generate purchase receipts.
 
@@ -6,9 +6,9 @@ Currently, the app supports only Azerbaijani, but English support will be added 
 
 ---
 
-### 📌 Features
+## 📌 Features
 
-## Automated Weighing Process
+### Automated Weighing Process
 
 • First measurement records the gross weight (container full).
 
@@ -16,7 +16,7 @@ Currently, the app supports only Azerbaijani, but English support will be added 
 
 • Final net weight is calculated automatically (gross – tare).
 
-## Data Management
+### Data Management
 
 • All transactions are stored in MS SQL Server.
 
@@ -28,7 +28,7 @@ Currently, the app supports only Azerbaijani, but English support will be added 
 
 ---
 
-### 🛠 Tech Stack
+## 🛠 Tech Stack
 
 Frontend (Desktop): JavaFX
 
@@ -40,7 +40,7 @@ UI Framework: Bootstrap
 
 ---
 
-### 🔐 Security
+## 🔐 Security
 
 User login system is built with Spring Security.
 
@@ -50,7 +50,7 @@ Passwords are securely encrypted before being stored.
 
 ---
 
-### 📂 Project Structure
+## 📂 Project Structure
 
 Scales → JavaFX application (user interface for operators).
 
@@ -58,6 +58,6 @@ ScalesAPI → Spring Boot REST API (handles authentication, data storage, and bu
 
 ---
 
-### 📸 Example Workflow
+## 📸 Example Workflow
 
 Video here
