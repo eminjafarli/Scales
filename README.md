@@ -1,3 +1,6 @@
+u can check backend code there --> [ScalesAPI](https://github.com/eminjafarli/ScalesAPI)
+
+
 ## SCALES
 
 ⚖️ Scales is a system developed for an agricultural company to manage and complete purchases directly at the factory. The application integrates hardware scales with a digital system to automate the weighing process, record transactions, and generate purchase receipts.
