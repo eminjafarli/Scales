@@ -63,4 +63,4 @@ ScalesAPI → Spring Boot REST API (handles authentication, data storage, and bu
 
 ## 📸 Example Workflow
 
-Video here
+Video is coming soon 👀
