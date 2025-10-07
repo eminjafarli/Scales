@@ -20,7 +20,6 @@ import com.agrarco.agrovers.Models.Region;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.Scene;
 import javafx.scene.image.WritableImage;
@@ -59,11 +58,11 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import lombok.Getter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterJob;
@@ -82,24 +81,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
-import static org.bouncycastle.crypto.tls.ConnectionEnd.client;
 
 public class HelloApplication extends Application {
+    TableColumn<Purchase, String> regionCol;
     private final ObservableList<Purchase> saleList = FXCollections.observableArrayList();
     TableColumn<Purchase, String> tedarukcuCol;
     private Scene saleTableScene;
     private Scene qabiqSatishiFormScene;
     public static String jwtToken;
+    private FilteredList<Purchase> filteredData;
     public static String userName;
     public static String type;
     private String tarix, neqliyyatNomresi, lotNomresi, menteqe, regionBag, anbar, tedarukcu;
     private int kiseSayi,paletSayi;
     private double birKiseninCekisi, birPaletinCekisi, doluCeki, bosCeki, netCeki;
     private String qeyd;
+    @Getter
     private static CASScaleReader scaleReader;
     private TextField doluCekiAuto;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -108,6 +106,7 @@ public class HelloApplication extends Application {
     private ComboBox<String> anbarBox;
     private ComboBox<String> tedarukcuBox;
     private Label tedarukcuLabel = new Label("Tədarükçü:");
+    private Label regionLabel = new Label("Region:");
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
@@ -334,8 +333,9 @@ public class HelloApplication extends Application {
         row++;
         formLayout.add(new Label("Məntəqə:"), 0, row);
         formLayout.add(menteqeBox, 1, row);
-        formLayout.add(new Label("Region/Bağ:"), 2, row);
+        formLayout.add(regionLabel, 2, row);
         formLayout.add(regionBox, 3, row);
+
 
         row++;
         formLayout.add(new Label("Anbar:"), 0, row);
@@ -407,7 +407,7 @@ public class HelloApplication extends Application {
         tableLayout.setPadding(new Insets(20));
         tableLayout.setStyle("-fx-background-color: white;");
 
-        TableView<?> tableView = new TableView<>();
+        TableView<Purchase> tableView = new TableView<>();
         tableLayout.setCenter(tableView);
 
         scaleReader = new CASScaleReader("COM3", CASScaleReader.ScaleMode.CI200A);
@@ -418,10 +418,16 @@ public class HelloApplication extends Application {
             scaleReader.startReading(100);
         }
 
-
         alisSiyahisi.setOnAction(e -> {
             type = "FA";
             tedarukcuCol.setText("Tədarükçü");
+            regionCol.setVisible(true);
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                return region1 == null || !region1.contains("QS");
+            });
+
             loadPurchasesFromApi();
             primaryStage.setScene(tableScene);
         });
@@ -429,8 +435,18 @@ public class HelloApplication extends Application {
         satisSiyahisi.setOnAction(e -> {
             type = "QS";
             tedarukcuCol.setText("Alıcı");
+            regionCol.setVisible(false);
+
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                return region1 != null && region1.contains("QS");
+            });
+
+            loadPurchasesFromApi();
             primaryStage.setScene(tableScene);
         });
+
 
 
 
@@ -439,12 +455,18 @@ public class HelloApplication extends Application {
             primaryStage.setScene(formScene);
             type = "FA";
             tedarukcuLabel.setText("Tədarükçü:");
+            regionBox.setVisible(true);
+            regionLabel.setVisible(true);
+            regionBox.setValue(null);
         });
         qabiqSatis.setOnAction(e -> {
             primaryStage.setScene(formScene);
             primaryStage.setMaximized(true);
             type = "QS";
             tedarukcuLabel.setText("Alıcı:");
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            regionBox.setValue("QS");
 
         });
         backButton.setOnAction(e -> {
@@ -560,9 +582,7 @@ public class HelloApplication extends Application {
         this.loggedInName = name;
         this.loggedInRole = role;
     }
-    public static CASScaleReader getScaleReader() {
-        return scaleReader;
-    }
+
     private void setupIntegerField(TextField field) {
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String newText = change.getControlNewText();
@@ -575,23 +595,41 @@ public class HelloApplication extends Application {
     }
 
     public static class Purchase {
+        @Getter
         private final String loggedInUser;
+        @Getter
         private final long id;
+        @Getter
         private final String neqliyyatNomresi;
+        @Getter
         private final String lotNomresi;
+        @Getter
         private final String menteqe;
+        @Getter
         private final String regionBag;
+        @Getter
         private final String anbar;
+        @Getter
         private final String tedarukcu;
+        @Getter
         private final int kiseSayi;
+        @Getter
         private final double birKiseninCekisi;
+        @Getter
         private final double doluCeki;
+        @Getter
         private final double bosCeki;
+        @Getter
         private final double netCeki;
+        @Getter
         private final double birPaletinCekisi;
+        @Getter
         private final int paletSayi;
+        @Getter
         private final String qeyd;
+        @Getter
         private final LocalDateTime doluTarix;
+        @Getter
         private LocalDateTime bosTarix;
         private boolean locked;
 
@@ -635,24 +673,6 @@ public class HelloApplication extends Application {
             this.doluTarix = doluTarix;
             this.bosTarix = bosTarix;
         }
-        public String getLoggedInUser() { return loggedInUser; }
-        public long getId() {return id;}
-        public String getNeqliyyatNomresi() { return neqliyyatNomresi; }
-        public String getLotNomresi() { return lotNomresi; }
-        public String getMenteqe() { return menteqe; }
-        public String getRegionBag() { return regionBag; }
-        public String getAnbar() { return anbar; }
-        public String getTedarukcu() { return tedarukcu; }
-        public int getKiseSayi() { return kiseSayi; }
-        public double getBirKiseninCekisi() { return birKiseninCekisi; }
-        public double getBirPaletinCekisi() {return birPaletinCekisi; }
-        public int getPaletSayi() { return paletSayi; }
-        public double getDoluCeki() { return doluCeki; }
-        public double getBosCeki() { return bosCeki; }
-        public double getNetCeki() { return netCeki; }
-        public String getQeyd() { return qeyd; }
-        public LocalDateTime getDoluTarix() { return doluTarix; }
-        public LocalDateTime getBosTarix() { return bosTarix; }
     }
     private final ObservableList<Purchase> purchaseList = FXCollections.observableArrayList();
 
@@ -810,7 +830,7 @@ public class HelloApplication extends Application {
         TableColumn<Purchase, String> menteqeCol = new TableColumn<>("Məntəqə");
         menteqeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getMenteqe()));
 
-        TableColumn<Purchase, String> regionCol = new TableColumn<>("Region/Bağ");
+        regionCol = new TableColumn<>("Region/Bağ");
         regionCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRegionBag()));
 
         TableColumn<Purchase, String> anbarCol = new TableColumn<>("Anbar");
@@ -832,7 +852,7 @@ public class HelloApplication extends Application {
         tableView.getColumns().setAll(lotCol, neqliyyatCol, doluTarixCol, bosTarixCol, doluCol, bosCol, netCol, kiseCol, birKiseCol,paletCol,birPaletCol, menteqeCol, regionCol, anbarCol, tedarukcuCol, qeydCol,userCol);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        FilteredList<Purchase> filteredData = new FilteredList<>(purchaseList, p -> true);
+        filteredData = new FilteredList<>(purchaseList, p -> true);
         tableView.setItems(filteredData);
 
         Button btnYeni = new Button("Yeni");
@@ -971,22 +991,64 @@ public class HelloApplication extends Application {
             btnBugun.setOnAction(ev -> {
                 dialog.close();
                 LocalDate today = LocalDate.now();
-                filteredData.setPredicate(p -> p.getDoluTarix().toLocalDate().isEqual(today));
+
+                filteredData.setPredicate(p -> {
+                    boolean dateOk = p.getDoluTarix() != null &&
+                            p.getDoluTarix().toLocalDate().isEqual(today);
+
+                    boolean typeOk = true;
+                    String marker = p.getRegionBag();
+                    if ("FA".equals(type)) {
+                        typeOk = (marker == null || !marker.contains("QS"));
+                    } else if ("QS".equals(type)) {
+                        typeOk = (marker != null && marker.contains("QS"));
+                    }
+
+                    return dateOk && typeOk;
+                });
             });
 
             btnDunen.setOnAction(ev -> {
                 dialog.close();
                 LocalDate yesterday = LocalDate.now().minusDays(1);
-                filteredData.setPredicate(p -> p.getDoluTarix().toLocalDate().isEqual(yesterday));
+
+                filteredData.setPredicate(p -> {
+                    boolean dateOk = p.getDoluTarix() != null &&
+                            p.getDoluTarix().toLocalDate().isEqual(yesterday);
+
+                    boolean typeOk = true;
+                    String marker = p.getRegionBag();
+                    if ("FA".equals(type)) {
+                        typeOk = (marker == null || !marker.contains("QS"));
+                    } else if ("QS".equals(type)) {
+                        typeOk = (marker != null && marker.contains("QS"));
+                    }
+
+                    return dateOk && typeOk;
+                });
             });
 
             btn7Gun.setOnAction(ev -> {
                 dialog.close();
                 LocalDate today = LocalDate.now();
                 LocalDate sevenDaysAgo = today.minusDays(6);
+
                 filteredData.setPredicate(p -> {
-                    LocalDate d = p.getDoluTarix().toLocalDate();
-                    return !d.isBefore(sevenDaysAgo) && !d.isAfter(today);
+                    boolean dateOk = false;
+                    if (p.getDoluTarix() != null) {
+                        LocalDate d = p.getDoluTarix().toLocalDate();
+                        dateOk = !d.isBefore(sevenDaysAgo) && !d.isAfter(today);
+                    }
+
+                    boolean typeOk = true;
+                    String marker = p.getRegionBag();
+                    if ("FA".equals(type)) {
+                        typeOk = (marker == null || !marker.contains("QS"));
+                    } else if ("QS".equals(type)) {
+                        typeOk = (marker != null && marker.contains("QS"));
+                    }
+
+                    return dateOk && typeOk;
                 });
             });
 
@@ -994,16 +1056,41 @@ public class HelloApplication extends Application {
                 dialog.close();
                 LocalDate today = LocalDate.now();
                 LocalDate thirtyDaysAgo = today.minusDays(29);
+
                 filteredData.setPredicate(p -> {
-                    LocalDate d = p.getDoluTarix().toLocalDate();
-                    return !d.isBefore(thirtyDaysAgo) && !d.isAfter(today);
+                    boolean dateOk = false;
+                    if (p.getDoluTarix() != null) {
+                        LocalDate d = p.getDoluTarix().toLocalDate();
+                        dateOk = !d.isBefore(thirtyDaysAgo) && !d.isAfter(today);
+                    }
+
+                    boolean typeOk = true;
+                    String marker = p.getRegionBag();
+                    if ("FA".equals(type)) {
+                        typeOk = (marker == null || !marker.contains("QS"));
+                    } else if ("QS".equals(type)) {
+                        typeOk = (marker != null && marker.contains("QS"));
+                    }
+
+                    return dateOk && typeOk;
                 });
             });
 
             btnHamisi.setOnAction(ev -> {
                 dialog.close();
-                filteredData.setPredicate(p -> true);
+
+                filteredData.setPredicate(p -> {
+                    boolean typeOk = true;
+                    String marker = p.getRegionBag();
+                    if ("FA".equals(type)) {
+                        typeOk = (marker == null || !marker.contains("QS"));
+                    } else if ("QS".equals(type)) {
+                        typeOk = (marker != null && marker.contains("QS"));
+                    }
+                    return typeOk;
+                });
             });
+
 
             dialog.showAndWait();
         });

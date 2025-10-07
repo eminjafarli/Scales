@@ -463,36 +463,40 @@ public class Edit {
             try {
                 LocalDateTime doluTarix;
                 LocalDateTime bosTarix = null;
-
-                HelloApplication.Purchase purchase;
                 long purchaseId = -1;
+                String lot;
+                String loggedInUser;
 
                 if (editingIndex >= 0) {
                     HelloApplication.Purchase existing = purchaseList.get(editingIndex);
                     purchaseId = existing.getId();
-
                     doluTarix = existing.getDoluTarix();
-
                     bosTarix = (existing.getBosTarix() != null) ? existing.getBosTarix() : LocalDateTime.now();
+                    lot = existing.getLotNomresi();
+                    loggedInUser = existing.getLoggedInUser();
                 } else {
+                    HelloApplication.Purchase existing = purchaseList.get(editingIndex);
                     doluTarix = LocalDateTime.now();
                     bosTarix = null;
+                    lot = fetchNewLot();
+                    loggedInUser = existing.getLoggedInUser();
                 }
 
-                String lot = editingIndex >= 0 ? purchaseList.get(editingIndex).getLotNomresi() : fetchNewLot();
+                int kiseSayi = Integer.parseInt(kiseSayiField.getText());
+                double birKise = Double.parseDouble(birKiseField.getText());
+                int paletSayi = Integer.parseInt(paletSayiField.getText());
+                double birPalet = Double.parseDouble(birPaletField.getText());
+                double doluCeki = parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText());
+                double bosCeki = parseDoubleSafe(manualToggle.isSelected() ? bosCekiManual.getText() : bosCekiAuto.getText());
+                double netCeki = parseDoubleSafe(manualToggle.isSelected() ? netCekiManual.getText() : netCekiAuto.getText());
 
-                purchase = new HelloApplication.Purchase(
-                        purchaseList.get(editingIndex).getLoggedInUser(), purchaseId,
+                HelloApplication.Purchase purchase = new HelloApplication.Purchase(
+                        loggedInUser, purchaseId,
                         neqliyyatField.getText(), lot,
                         menteqeBox.getValue(), regionBox.getValue(), anbarBox.getValue(), tedarukcuBox.getValue(),
-                        Integer.parseInt(kiseSayiField.getText()),
-                        Double.parseDouble(birKiseField.getText()),
-                        Double.parseDouble(birPaletField.getText()),
-                        Integer.parseInt(paletSayiField.getText()),
-                        parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText()),
-                        parseDoubleSafe(manualToggle.isSelected() ? bosCekiManual.getText() : bosCekiAuto.getText()),
-                        parseDoubleSafe(manualToggle.isSelected() ? netCekiManual.getText() : netCekiAuto.getText()),
-                        qeydArea.getText(),
+                        kiseSayi, birKise,
+                        birPalet,paletSayi,
+                        doluCeki, bosCeki, netCeki, qeydArea.getText(),
                         doluTarix, bosTarix
                 );
 
@@ -504,8 +508,8 @@ public class Edit {
                     purchaseList.add(purchase);
                 }
 
-                primaryStage.setScene(tableScene);
                 resetFields();
+                primaryStage.setScene(tableScene);
 
             } catch (NumberFormatException ex) {
                 System.out.println("Xahiş olunur, rəqəm daxil edin");
@@ -513,6 +517,7 @@ public class Edit {
                 ex.printStackTrace();
             }
         });
+
 
 
 
