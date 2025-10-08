@@ -458,6 +458,13 @@ public class HelloApplication extends Application {
             regionBox.setVisible(true);
             regionLabel.setVisible(true);
             regionBox.setValue(null);
+            tedarukcuCol.setText("Tədarükçü");
+            regionCol.setVisible(true);
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                return region1 == null || !region1.contains("QS");
+            });
         });
         qabiqSatis.setOnAction(e -> {
             primaryStage.setScene(formScene);
@@ -467,6 +474,15 @@ public class HelloApplication extends Application {
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             regionBox.setValue("QS");
+            tedarukcuCol.setText("Alıcı");
+            regionCol.setVisible(false);
+
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                return region1 != null && region1.contains("QS");
+            });
+
 
         });
         backButton.setOnAction(e -> {
