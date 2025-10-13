@@ -74,6 +74,9 @@ public class Edit {
     private TextField bosCekiAuto;
     private TextField netCekiAuto;
 
+    private Label tedarukcuLabel = new Label("Tədarükçü:");
+    private Label regionLabel = new Label("Region:");
+
     private TextField doluCekiManual;
     private TextField bosCekiManual;
     private TextField netCekiManual;
@@ -83,6 +86,7 @@ public class Edit {
     private StackPane netContainer;
 
     private CheckBox manualToggle;
+    private HelloApplication.Purchase originalPurchase;
 
     private boolean canShowAlert = true;
     private final Stage primaryStage;
@@ -169,9 +173,19 @@ public class Edit {
         public String getQeyd() { return qeyd; }
     }
     Button saveButton = new Button("Yadda saxla");
-    public void loadPurchase(HelloApplication.Purchase p, int index) {
-        editingIndex = index;
+    public void loadPurchase(HelloApplication.Purchase p) {
+        this.originalPurchase = p;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+        if ("QS".equalsIgnoreCase(p.getRegionBag())) {
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            tedarukcuLabel.setText("Alıcı:");
+        } else {
+            regionBox.setVisible(true);
+            regionLabel.setVisible(true);
+            tedarukcuLabel.setText("Tədarükçü:");
+        }
 
         if (p.getDoluTarix() != null) {
             tarixField.setText(p.getDoluTarix().format(formatter));
@@ -411,13 +425,13 @@ public class Edit {
         row++;
         formLayout.add(new Label("Məntəqə:"), 0, row);
         formLayout.add(menteqeBox, 1, row);
-        formLayout.add(new Label("Region/Bağ:"), 2, row);
+        formLayout.add(regionLabel, 2, row);
         formLayout.add(regionBox, 3, row);
 
         row++;
         formLayout.add(new Label("Anbar:"), 0, row);
         formLayout.add(anbarBox, 1, row);
-        formLayout.add(new Label("Tədarükçü:"), 2, row);
+        formLayout.add(tedarukcuLabel, 2, row);
         formLayout.add(tedarukcuBox, 3, row);
 
         row++;
@@ -467,19 +481,17 @@ public class Edit {
                 String lot;
                 String loggedInUser;
 
-                if (editingIndex >= 0) {
-                    HelloApplication.Purchase existing = purchaseList.get(editingIndex);
-                    purchaseId = existing.getId();
-                    doluTarix = existing.getDoluTarix();
-                    bosTarix = (existing.getBosTarix() != null) ? existing.getBosTarix() : LocalDateTime.now();
-                    lot = existing.getLotNomresi();
-                    loggedInUser = existing.getLoggedInUser();
+                if (originalPurchase != null) {
+                    purchaseId = originalPurchase.getId();
+                    doluTarix = originalPurchase.getDoluTarix();
+                    bosTarix = (originalPurchase.getBosTarix() != null) ? originalPurchase.getBosTarix() : LocalDateTime.now();
+                    lot = originalPurchase.getLotNomresi();
+                    loggedInUser = originalPurchase.getLoggedInUser();
                 } else {
-                    HelloApplication.Purchase existing = purchaseList.get(editingIndex);
                     doluTarix = LocalDateTime.now();
                     bosTarix = null;
                     lot = fetchNewLot();
-                    loggedInUser = existing.getLoggedInUser();
+                    loggedInUser = originalPurchase.getLoggedInUser();
                 }
 
                 int kiseSayi = Integer.parseInt(kiseSayiField.getText());
@@ -502,8 +514,11 @@ public class Edit {
 
                 updatePurchaseToApi(purchase, purchaseId);
 
-                if (editingIndex >= 0) {
-                    purchaseList.set(editingIndex, purchase);
+                if (originalPurchase != null) {
+                    int actualIndex = purchaseList.indexOf(originalPurchase);
+                    if (actualIndex != -1) {
+                        purchaseList.set(actualIndex, purchase);
+                    }
                 } else {
                     purchaseList.add(purchase);
                 }

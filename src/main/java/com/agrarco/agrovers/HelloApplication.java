@@ -932,7 +932,7 @@ public class HelloApplication extends Application {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    editPage.loadPurchase(selectedPurchase, tableView.getSelectionModel().getSelectedIndex());
+                    editPage.loadPurchase(selectedPurchase);
                     primaryStage.setScene(editPage.getFormScene());
                 }
             });
