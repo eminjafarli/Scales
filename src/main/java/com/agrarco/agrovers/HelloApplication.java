@@ -1207,7 +1207,7 @@ public class HelloApplication extends Application {
 
                 float[] colWidths = {2, 1, 1, 1, 1};
                 Table table = new Table(UnitValue.createPercentArray(colWidths)).useAllAvailableWidth();
-                table.setMarginBottom(20);
+                table.setMarginBottom(24);
 
                 AtomicInteger cellsAdded = new AtomicInteger();
                 ImageData imageData = ImageDataFactory.create("a.jpg");
@@ -1216,7 +1216,7 @@ public class HelloApplication extends Application {
                         .setTextAlignment(TextAlignment.CENTER)
                         .setVerticalAlignment(VerticalAlignment.MIDDLE)
                         .setBorder(new SolidBorder(1))
-                        .setHeight(50);
+                        .setHeight(40);
                 table.addCell(photoCell);
                 cellsAdded.addAndGet(5);
                 Cell standaloneTitle = new Cell(1, 3)
@@ -1225,7 +1225,7 @@ public class HelloApplication extends Application {
                         .setTextAlignment(TextAlignment.CENTER)
                         .setVerticalAlignment(VerticalAlignment.MIDDLE)
                         .setBorder(new SolidBorder(1))
-                        .setHeight(50);
+                        .setHeight(40);
                 table.addCell(standaloneTitle);
                 cellsAdded.addAndGet(5);
 
@@ -1404,7 +1404,13 @@ public class HelloApplication extends Application {
                 }
 
                 document.add(table);
+
+                if ("QS".equalsIgnoreCase(p.getRegionBag())) {
+                    document.add(table);
+                }
+
                 document.add(new AreaBreak());
+
             }
 
             document.close();
