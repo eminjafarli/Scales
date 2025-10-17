@@ -87,6 +87,8 @@ public class HelloApplication extends Application {
     TableColumn<Purchase, String> regionCol;
     private final ObservableList<Purchase> saleList = FXCollections.observableArrayList();
     TableColumn<Purchase, String> tedarukcuCol;
+    TableColumn<Purchase, String> bosCol;
+    TableColumn<Purchase, String> doluCol;
     private Scene saleTableScene;
     private Scene qabiqSatishiFormScene;
     public static String jwtToken;
@@ -107,6 +109,7 @@ public class HelloApplication extends Application {
     private ComboBox<String> tedarukcuBox;
     private Label tedarukcuLabel = new Label("Tədarükçü:");
     private Label regionLabel = new Label("Region:");
+    private Label doluLabel = new Label("dolu");
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
@@ -283,9 +286,9 @@ public class HelloApplication extends Application {
         styleTextInput(netCekiManual);
         bindNetCeki(doluCekiManual, bosCekiManual, netCekiManual,kiseSayiField,birKiseField,paletSayiField,birPaletField);
         doluCekiManual.textProperty().addListener((obs, oldVal, newVal) ->
-                updateNetCeki(doluCekiManual, bosCekiManual, netCekiManual));
+                updateNetCeki(doluCekiManual, bosCekiManual, netCekiManual,  kiseSayiField, birKiseField,paletSayiField,  birPaletField));
         bosCekiManual.textProperty().addListener((obs, oldVal, newVal) ->
-                updateNetCeki(doluCekiManual, bosCekiManual, netCekiManual));
+                updateNetCeki(doluCekiManual, bosCekiManual, netCekiManual,  kiseSayiField, birKiseField,paletSayiField,  birPaletField));
 
         setupFieldValidation(kiseSayiField, true);
         setupFieldValidation(birPaletField, true);
@@ -361,7 +364,7 @@ public class HelloApplication extends Application {
         qeydArea.setMaxHeight(100);
 
         row++;
-        formLayout.add(new Label("DOLU ÇƏKİ:"), 0, row);
+        formLayout.add(doluLabel, 0, row);
         formLayout.add(doluContainer, 1, row);
 
         // ------------------ BUTTONS ------------------
@@ -410,18 +413,14 @@ public class HelloApplication extends Application {
         TableView<Purchase> tableView = new TableView<>();
         tableLayout.setCenter(tableView);
 
-        scaleReader = new CASScaleReader("COM3", CASScaleReader.ScaleMode.CI200A);
-        if (scaleReader.connect()) {
-            scaleReader.addWeightListener(weight ->
-                    Platform.runLater(() -> doluCekiAuto.setText(weight))
-            );
-            scaleReader.startReading(100);
-        }
+        startScaleReader();
 
         alisSiyahisi.setOnAction(e -> {
             type = "FA";
             tedarukcuCol.setText("Tədarükçü");
             regionCol.setVisible(true);
+            bosCol.setText("Boş çəki");
+            doluCol.setText("Dolu çəki");
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
@@ -436,6 +435,8 @@ public class HelloApplication extends Application {
             type = "QS";
             tedarukcuCol.setText("Alıcı");
             regionCol.setVisible(false);
+            bosCol.setText("Dolu çəki");
+            doluCol.setText("Boş çəki");
 
 
             filteredData.setPredicate(p -> {
@@ -459,6 +460,7 @@ public class HelloApplication extends Application {
             regionLabel.setVisible(true);
             regionBox.setValue(null);
             tedarukcuCol.setText("Tədarükçü");
+            doluLabel.setText("DOLU ÇƏKİ:");
             regionCol.setVisible(true);
 
             filteredData.setPredicate(p -> {
@@ -476,6 +478,7 @@ public class HelloApplication extends Application {
             regionBox.setValue("QS");
             tedarukcuCol.setText("Alıcı");
             regionCol.setVisible(false);
+            doluLabel.setText("BOS ÇƏKİ:");
 
 
             filteredData.setPredicate(p -> {
@@ -820,13 +823,13 @@ public class HelloApplication extends Application {
         TableColumn<Purchase, String> bosTarixCol = new TableColumn<>("Boş Tarix");
         bosTarixCol.setCellValueFactory(data -> {
             LocalDateTime bt = data.getValue().getBosTarix();
-            return new SimpleStringProperty(bt != null ? bt.format(formatter) : "             -");
+            return new SimpleStringProperty(bt != null ? bt.format(formatter) : "           -");
         });
-        TableColumn<Purchase, Double> doluCol = new TableColumn<>("Dolu çəki");
-        doluCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getDoluCeki()).asObject());
+        doluCol = new TableColumn<>("Dolu çəki");
+        doluCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getDoluCeki()).asObject().asString());
 
-        TableColumn<Purchase, Double> bosCol = new TableColumn<>("Boş çəki");
-        bosCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getBosCeki()).asObject());
+        bosCol = new TableColumn<>("Boş çəki");
+        bosCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getBosCeki()).asObject().asString());
 
         TableColumn<Purchase, Double> netCol = new TableColumn<>("Net çəki");
         netCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getNetCeki()).asObject());
@@ -1572,10 +1575,24 @@ public class HelloApplication extends Application {
         });
     }
 
-    private void updateNetCeki(TextField doluField, TextField bosField, TextField netField) {
+    private void updateNetCeki(TextField doluField, TextField bosField, TextField netField, TextField kiseSayiField, TextField birKiseField,TextField paletSayiField, TextField birPaletField) {
         double dolu = parseDoubleSafe(doluField.getText());
         double bos = parseDoubleSafe(bosField.getText());
-        netField.setText((dolu - bos) + " kg");
+        double birkise = parseDoubleSafe(birKiseField.getText());
+        double kisesayi = parseDoubleSafe(kiseSayiField.getText());
+        double paletsayi = parseDoubleSafe(paletSayiField.getText());
+        double birpalet = parseDoubleSafe(birPaletField.getText());
+        netField.setText(dolu - (bos + kisesayi*(birkise/1000) + paletsayi*(birpalet/1000)) + " kg");
+    }
+    private void updateNetCekiReverse(TextField doluField, TextField bosField, TextField netField, TextField kiseSayiField, TextField birKiseField,TextField paletSayiField, TextField birPaletField) {
+        double dolu = parseDoubleSafe(doluField.getText());
+        double bos = parseDoubleSafe(bosField.getText());
+        double birkise = parseDoubleSafe(birKiseField.getText());
+        double kisesayi = parseDoubleSafe(kiseSayiField.getText());
+        double paletsayi = parseDoubleSafe(paletSayiField.getText());
+        double birpalet = parseDoubleSafe(birPaletField.getText());
+
+        netField.setText(bos - (dolu + kisesayi*(birkise/1000) + paletsayi*(birpalet/1000)) + " kg");
     }
     private double parseDoubleSafe(String text) {
         try {
@@ -1587,6 +1604,10 @@ public class HelloApplication extends Application {
     private void bindNetCeki(TextField doluField, TextField bosField, TextField netField, TextField kiseSayiField, TextField birKiseField,TextField paletSayiField, TextField birPaletField) {
         doluField.textProperty().addListener((obs, oldVal, newVal) -> calculateNet(doluField, bosField, netField,birKiseField,kiseSayiField,birPaletField,paletSayiField));
         bosField.textProperty().addListener((obs, oldVal, newVal) -> calculateNet(doluField, bosField, netField,birKiseField,kiseSayiField,birPaletField,paletSayiField));
+    }
+    private void bindNetCekiReverse(TextField doluField, TextField bosField, TextField netField, TextField kiseSayiField, TextField birKiseField,TextField paletSayiField, TextField birPaletField) {
+        doluField.textProperty().addListener((obs, oldVal, newVal) -> calculateNetReverse(doluField, bosField, netField,birKiseField,kiseSayiField,birPaletField,paletSayiField));
+        bosField.textProperty().addListener((obs, oldVal, newVal) -> calculateNetReverse(doluField, bosField, netField,birKiseField,kiseSayiField,birPaletField,paletSayiField));
     }
     private void loadPurchasesFromApi() {
         Task<List<Purchase>> task = new Task<>() {
@@ -1662,6 +1683,20 @@ public class HelloApplication extends Application {
         double paletsayi = parseDoubleSafe(paletSayiField.getText());
         double birpalet = parseDoubleSafe(birPaletField.getText());
         double net = dolu - (bos + kisesayi*(birkise/1000) + paletsayi*(birpalet/1000));
+
+        BigDecimal rounded = new BigDecimal(net).setScale(2, RoundingMode.HALF_UP);
+
+        netField.setText(rounded.toString());
+    }
+
+    private void calculateNetReverse(TextField doluField, TextField bosField, TextField netField, TextField birKiseField, TextField kiseSayiField, TextField paletSayiField,TextField birPaletField) {
+        double dolu = parseDoubleSafe(doluField.getText());
+        double bos = parseDoubleSafe(bosField.getText());
+        double birkise = parseDoubleSafe(birKiseField.getText());
+        double kisesayi = parseDoubleSafe(kiseSayiField.getText());
+        double paletsayi = parseDoubleSafe(paletSayiField.getText());
+        double birpalet = parseDoubleSafe(birPaletField.getText());
+        double net = bos - (dolu + kisesayi*(birkise/1000) + paletsayi*(birpalet/1000));
 
         BigDecimal rounded = new BigDecimal(net).setScale(2, RoundingMode.HALF_UP);
 
