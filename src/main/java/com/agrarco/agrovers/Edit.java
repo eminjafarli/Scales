@@ -85,6 +85,8 @@ public class Edit {
     private StackPane bosContainer;
     private StackPane netContainer;
 
+    private Label doluBox = new Label("DOLU ÇƏKİ:");
+    private Label bosBox = new Label("BOS ÇƏKİ:");
     private CheckBox manualToggle;
     private HelloApplication.Purchase originalPurchase;
 
@@ -181,10 +183,15 @@ public class Edit {
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             tedarukcuLabel.setText("Alıcı:");
+            doluBox.setText("BOS ÇƏKİ:");
+            bosBox.setText("DOLU ÇƏKİ:");
+
         } else {
             regionBox.setVisible(true);
             regionLabel.setVisible(true);
             tedarukcuLabel.setText("Tədarükçü:");
+            doluBox.setText("DOLU ÇƏKİ:");
+            bosBox.setText("BOS ÇƏKİ:");
         }
 
         if (p.getDoluTarix() != null) {
@@ -451,9 +458,9 @@ public class Edit {
         qeydArea.setMaxHeight(100);
 
         row++;
-        formLayout.add(new Label("DOLU ÇƏKİ:"), 0, row);
+        formLayout.add(doluBox, 0, row);
         formLayout.add(doluContainer, 1, row);
-        formLayout.add(new Label("BOS ÇƏKİ:"), 2, row);
+        formLayout.add(bosBox, 2, row);
         formLayout.add(bosContainer, 3, row);
         formLayout.add(new Label("NET ÇƏKİ:"), 4, row);
         formLayout.add(netContainer, 5, row);

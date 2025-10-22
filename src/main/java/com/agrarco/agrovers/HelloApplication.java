@@ -130,10 +130,10 @@ public class HelloApplication extends Application {
         Button alisSiyahisi = new Button("Alış siyahısı");
         styleButtonGreen(yeniAlis);
         styleButtonGreen(alisSiyahisi);
+
         Button logoutButton = new Button("Çıxış");
         styleButtonRed(logoutButton);
         logoutButton.setOnAction(e -> {
-
             Stage stage = (Stage) logoutButton.getScene().getWindow();
             stage.close();
             stop();
@@ -149,6 +149,26 @@ public class HelloApplication extends Application {
 
         leftBox.getChildren().addAll(leftTitle, yeniAlis, alisSiyahisi);
 
+// ------------------ MIDDLE BOX (Ləpə alışı) ------------------
+        VBox middleBox = new VBox(20);
+        middleBox.setAlignment(Pos.TOP_CENTER);
+        middleBox.setPadding(new Insets(20));
+        middleBox.setMaxHeight(220);
+        middleBox.setMinWidth(300);
+        middleBox.setBackground(new Background(new BackgroundFill(Color.web("#F7F7F9"), new CornerRadii(10), Insets.EMPTY)));
+
+        Label middleTitle = new Label("Ləpə alışı");
+        middleTitle.setFont(Font.font("Arial", 28));
+        middleTitle.setTextFill(Color.web("#2E8B57"));
+
+        Button yeniLepeAlis = new Button("Yeni alış");
+        Button lepeAlisSiyahisi = new Button("Alış siyahısı");
+        styleButtonGreen(yeniLepeAlis);
+        styleButtonGreen(lepeAlisSiyahisi);
+
+        middleBox.getChildren().addAll(middleTitle, yeniLepeAlis, lepeAlisSiyahisi);
+
+// ------------------ RIGHT BOX ------------------
         VBox rightBox = new VBox(20);
         rightBox.setAlignment(Pos.TOP_CENTER);
         rightBox.setPadding(new Insets(20));
@@ -167,20 +187,24 @@ public class HelloApplication extends Application {
 
         rightBox.getChildren().addAll(rightTitle, qabiqSatis, satisSiyahisi);
 
+// ------------------ MAIN LAYOUT ------------------
         HBox mainLayout = new HBox(20);
         mainLayout.prefWidthProperty().bind(primaryStage.widthProperty());
         mainLayout.prefHeightProperty().bind(primaryStage.heightProperty());
         mainLayout.setAlignment(Pos.CENTER);
         mainLayout.setPadding(new Insets(-30, 0, 0, 0));
-        mainLayout.getChildren().addAll(leftBox, rightBox);
+        mainLayout.getChildren().addAll(leftBox, middleBox, rightBox);
         mainLayout.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
         BorderPane mainPane = new BorderPane();
         mainPane.setCenter(mainLayout);
+
         HBox topBar = new HBox();
         topBar.setAlignment(Pos.TOP_LEFT);
         topBar.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         topBar.setPadding(new Insets(20, 0, 0, 20));
         topBar.getChildren().add(logoutButton);
+
         mainPane.setTop(topBar);
         Scene mainScene = new Scene(mainPane);
 
@@ -421,6 +445,11 @@ public class HelloApplication extends Application {
             regionCol.setVisible(true);
             bosCol.setText("Boş çəki");
             doluCol.setText("Dolu çəki");
+            doluLabel.setText("DOLU ÇƏKİ:");
+            tedarukcuLabel.setText("Tədarükçü:");
+            regionBox.setVisible(true);
+            regionLabel.setVisible(true);
+            regionBox.setValue(null);
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
@@ -437,6 +466,11 @@ public class HelloApplication extends Application {
             regionCol.setVisible(false);
             bosCol.setText("Dolu çəki");
             doluCol.setText("Boş çəki");
+            doluLabel.setText("BOS ÇƏKİ:");
+            tedarukcuLabel.setText("Alıcı:");
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            regionBox.setValue("QS");
 
 
             filteredData.setPredicate(p -> {
@@ -884,7 +918,11 @@ public class HelloApplication extends Application {
             btnSil.setVisible(false);
         }
 
-        btnYeni.setOnAction(e -> primaryStage.setScene(formScene));
+        btnYeni.setOnAction(e ->
+        {
+            primaryStage.setScene(formScene);
+
+        });
 
         btnSil.setOnAction(e -> {
             Purchase selected = tableView.getSelectionModel().getSelectedItem();
