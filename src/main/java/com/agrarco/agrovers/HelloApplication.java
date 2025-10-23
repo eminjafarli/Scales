@@ -453,7 +453,30 @@ public class HelloApplication extends Application {
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                return region1 == null || !region1.contains("QS");
+                if (region1 == null) return true; // keep null values
+                return !(region1.contains("QS") || region1.contains("LA"));
+            });
+
+            loadPurchasesFromApi();
+            primaryStage.setScene(tableScene);
+        });
+
+        lepeAlisSiyahisi.setOnAction(e -> {
+            type = "LA";
+            tedarukcuLabel.setText("Tədarükçü:");
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            regionBox.setValue("LA");
+            tedarukcuCol.setText("Tədarükçü");
+            doluLabel.setText("DOLU ÇƏKİ:");
+            regionCol.setVisible(true);
+            bosCol.setText("Dolu çəki");
+            doluCol.setText("Boş çəki");
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                if (region1 == null) return true; // keep null values
+                return region1.contains("LA");
             });
 
             loadPurchasesFromApi();
@@ -496,10 +519,32 @@ public class HelloApplication extends Application {
             tedarukcuCol.setText("Tədarükçü");
             doluLabel.setText("DOLU ÇƏKİ:");
             regionCol.setVisible(true);
+            bosCol.setText("Boş çəki");
+            doluCol.setText("Dolu çəki");
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                return region1 == null || !region1.contains("QS");
+                if (region1 == null) return true; // keep null values
+                return !(region1.contains("QS") || region1.contains("LA"));
+            });
+        });
+        yeniLepeAlis.setOnAction(e -> {
+            primaryStage.setScene(formScene);
+            type = "LA";
+            tedarukcuLabel.setText("Tədarükçü:");
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            regionBox.setValue("LA");
+            tedarukcuCol.setText("Tədarükçü");
+            doluLabel.setText("DOLU ÇƏKİ:");
+            regionCol.setVisible(true);
+            bosCol.setText("Boş çəki");
+            doluCol.setText("Dolu çəki");
+
+            filteredData.setPredicate(p -> {
+                String region1 = p.getRegionBag();
+                if (region1 == null) return true; // keep null values
+                return region1.contains("LA");
             });
         });
         qabiqSatis.setOnAction(e -> {
@@ -513,6 +558,8 @@ public class HelloApplication extends Application {
             tedarukcuCol.setText("Alıcı");
             regionCol.setVisible(false);
             doluLabel.setText("BOS ÇƏKİ:");
+            bosCol.setText("Dolu çəki");
+            doluCol.setText("Boş çəki");
 
 
             filteredData.setPredicate(p -> {

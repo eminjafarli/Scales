@@ -186,7 +186,15 @@ public class Edit {
             doluBox.setText("BOS ÇƏKİ:");
             bosBox.setText("DOLU ÇƏKİ:");
 
-        } else {
+        }
+        else if ("LA".equalsIgnoreCase(p.getRegionBag())){
+            regionBox.setVisible(false);
+            regionLabel.setVisible(false);
+            tedarukcuLabel.setText("Tədarükçü:");
+            doluBox.setText("DOLU ÇƏKİ:");
+            bosBox.setText("BOS ÇƏKİ:");
+        }
+            else {
             regionBox.setVisible(true);
             regionLabel.setVisible(true);
             tedarukcuLabel.setText("Tədarükçü:");
