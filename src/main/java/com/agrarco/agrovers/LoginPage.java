@@ -1,6 +1,7 @@
 package com.agrarco.agrovers;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -9,9 +10,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.json.JSONObject;
@@ -31,50 +35,136 @@ public class LoginPage extends Application {
     public void start(Stage stage) {
         this.loginStage = stage;
 
-        BorderPane content = new BorderPane();
-        content.setStyle("-fx-background-color: #ffffff;");
-        content.setPrefSize(400, 500);
+        // ---------- Root Layout ----------
+        BorderPane rootLayout = new BorderPane();
 
-        VBox formBox = new VBox(15);
+        // ---------- Left Panel (Login Form) ----------
+        VBox formBox = new VBox(18);
         formBox.setAlignment(Pos.CENTER);
-        formBox.setPadding(new Insets(30));
-        formBox.setPrefWidth(400);
-        formBox.setMaxWidth(400);
-        formBox.setStyle("-fx-background-color: #F7F7F9; -fx-background-radius: 10; -fx-padding: 30;");
-        formBox.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.1)));
+        formBox.setPadding(new Insets(40));
+        formBox.setPrefWidth(450);
+        formBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 1 0 0;");
+        formBox.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.05)));
 
-        Label title = new Label("Daxil ol");
-        title.setFont(Font.font("Arial", 24));
+        ImageView logo = new ImageView(new Image(getClass().getResource("agrarco.png").toExternalForm()));
+        logo.setFitWidth(80); // small size
+        logo.setPreserveRatio(true);
+
+        Label title = new Label("Xoş Gəlmisiniz 👋");
+        title.setFont(Font.font("Arial", 28));
+        title.setTextFill(Color.web("#333"));
+
+        Label subtitle = new Label("Davam etmək üçün daxil olun");
+        subtitle.setFont(Font.font("Arial", 15));
+        subtitle.setTextFill(Color.web("#666"));
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("İstifadəçi adı");
         usernameField.setFont(Font.font(15));
-        usernameField.setPrefWidth(260);
+        usernameField.setPrefWidth(280);
+        usernameField.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 10;");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Şifrə");
         passwordField.setFont(Font.font(15));
-        passwordField.setPrefWidth(260);
+        passwordField.setPrefWidth(280);
+        passwordField.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 10;");
 
-        Button loginButton = new Button("Giriş");
-        loginButton.setPrefWidth(130);
-        loginButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 15;");
+        Button loginButton = new Button("Daxil ol");
+        loginButton.setPrefWidth(200);
+        loginButton.setStyle("""
+                -fx-background-color: linear-gradient(to right, #28a745, #218838);
+                -fx-text-fill: white;
+                -fx-font-size: 16;
+                -fx-background-radius: 12;
+                -fx-cursor: hand;
+                """);
 
-        formBox.getChildren().addAll(title, usernameField, passwordField, loginButton);
+        loginButton.setOnMouseEntered(e -> loginButton.setStyle("""
+                -fx-background-color: linear-gradient(to right, #34ce57, #28a745);
+                -fx-text-fill: white;
+                -fx-font-size: 16;
+                -fx-background-radius: 12;
+                -fx-cursor: hand;
+                """));
+        loginButton.setOnMouseExited(e -> loginButton.setStyle("""
+                -fx-background-color: linear-gradient(to right, #28a745, #218838);
+                -fx-text-fill: white;
+                -fx-font-size: 16;
+                -fx-background-radius: 12;
+                -fx-cursor: hand;
+                """));
 
-        VBox centerBox = new VBox(formBox);
-        centerBox.setAlignment(Pos.CENTER);
-        content.setCenter(centerBox);
+        formBox.getChildren().addAll(logo,title, subtitle, usernameField, passwordField, loginButton);
+
+        // Slide-in animation for form
+        formBox.setTranslateX(-100);
+        FadeTransition fadeInForm = new FadeTransition(Duration.millis(800), formBox);
+        fadeInForm.setFromValue(0);
+        fadeInForm.setToValue(1);
+        TranslateTransition slideForm = new TranslateTransition(Duration.millis(800), formBox);
+        slideForm.setFromX(-100);
+        slideForm.setToX(0);
+        fadeInForm.play();
+        slideForm.play();
+
+        // ---------- Right Panel (Image Section) ----------
+        StackPane imagePane = new StackPane();
+
+        // ✅ Load image safely (with fallback)
+        ImageView background;
+        try {
+            URL imageUrl = getClass().getResource("img.png");
+            if (imageUrl != null) {
+                background = new ImageView(new Image(imageUrl.toExternalForm()));
+            } else {
+                System.err.println("⚠️ Image not found: img.png — using placeholder color");
+                background = new ImageView();
+                background.setStyle("-fx-background-color: #28a745;");
+            }
+        } catch (Exception ex) {
+            background = new ImageView();
+            background.setStyle("-fx-background-color: #28a745;");
+        }
+
+        background.setPreserveRatio(false);
+        background.setFitHeight(Screen.getPrimary().getVisualBounds().getHeight());
+        background.setFitWidth(Screen.getPrimary().getVisualBounds().getWidth() * 0.75);
+        background.setOpacity(0);
+
+        // Fade in animation for image
+        FadeTransition fadeImage = new FadeTransition(Duration.millis(1200), background);
+        fadeImage.setFromValue(0);
+        fadeImage.setToValue(1);
+        fadeImage.play();
+
+        // ✅ Changed overlay text
+        Label overlayText = new Label("AGRARCO TƏRƏZİ OPERATORU");
+        overlayText.setFont(Font.font("Arial", 34));
+        overlayText.setTextFill(Color.WHITE);
+        overlayText.setStyle("-fx-font-weight: bold;");
+        overlayText.setOpacity(0.9);
+
+        VBox overlay = new VBox(overlayText);
+        overlay.setAlignment(Pos.CENTER);
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.4);");
+        imagePane.getChildren().addAll(background, overlay);
+
+        // ---------- Combine Left & Right ----------
+        HBox mainContainer = new HBox();
+        mainContainer.getChildren().addAll(formBox, imagePane);
+        HBox.setHgrow(imagePane, Priority.ALWAYS);
 
         notificationBox = new VBox();
         notificationBox.setAlignment(Pos.TOP_CENTER);
         notificationBox.setMouseTransparent(true);
         notificationBox.setSpacing(10);
 
-        StackPane root = new StackPane(content, notificationBox);
+        StackPane mainStack = new StackPane(mainContainer, notificationBox);
         StackPane.setAlignment(notificationBox, Pos.TOP_CENTER);
         StackPane.setMargin(notificationBox, new Insets(30, 0, 0, 0));
 
+        // ---------- Events ----------
         usernameField.setOnAction(e -> passwordField.requestFocus());
         passwordField.setOnAction(e -> loginButton.fire());
 
@@ -92,10 +182,14 @@ public class LoginPage extends Application {
             }
         });
 
-        Scene scene = new Scene(root);
-        stage.setTitle("Giriş");
+        // ---------- Scene & Stage ----------
+        Scene scene = new Scene(mainStack,
+                Screen.getPrimary().getVisualBounds().getWidth(),
+                Screen.getPrimary().getVisualBounds().getHeight());
+
+        stage.setTitle("Agrarco | Giriş");
         stage.setScene(scene);
-        stage.setMaximized(true);
+        stage.setMaximized(true); // ✅ Fullscreen mode
         stage.show();
     }
 
@@ -121,56 +215,18 @@ public class LoginPage extends Application {
                     }
 
                     int status = conn.getResponseCode();
-                    System.out.println("HTTP status: " + status);
-
                     InputStream is = (status == 200) ? conn.getInputStream() : conn.getErrorStream();
                     String response = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                    System.out.println("Cavab: " + response);
-
                     JSONObject jsonResponse = new JSONObject(response);
-                    String name;
-                    String role;
-                    if (status == 200) {
-                        if (jsonResponse.has("name")) {
-                            name = jsonResponse.getString("name");
-                        } else {
-                            name = null;
-                        }
-                        if (jsonResponse.has("role")) {
-                            role = jsonResponse.getString("role");
-                        } else {
-                            role = null;
-                        }
-                        System.out.println("User name: " + name);
-                        System.out.println("User role: " + role);
-                    } else {
-                        name = null;
-                        role = null;
-                    }
 
-                    conn.disconnect();
+                    String name = jsonResponse.optString("name", null);
+                    String role = jsonResponse.optString("role", null);
 
                     Platform.runLater(() -> {
-                        String displayMessage;
-
                         if (status == 200) {
-                            displayMessage = "Giriş uğurla tamamlandı";
-                        } else {
-                            if (response.contains("Invalid username") || response.contains("Bad credentials")) {
-                                displayMessage = "İstifadəçi adı və ya şifrə yanlışdır";
-                            } else if (response.contains("User not found")) {
-                                displayMessage = "İstifadəçi tapılmadı";
-                            } else {
-                                displayMessage = "İstifadəçi adı və ya şifrə yanlışdır";
-                            }
-                        }
-
-                        showNotification(displayMessage, status == 200);
-
-
-                        if (status == 200) {
-                            HelloApplication mainApp = new HelloApplication(name,role);
+                            showNotification("Giriş uğurla tamamlandı ✅", true);
                             try {
+                                HelloApplication mainApp = new HelloApplication(name, role);
                                 Stage primaryStage = new Stage();
                                 mainApp.start(primaryStage);
                                 loginStage.close();
@@ -178,6 +234,8 @@ public class LoginPage extends Application {
                                 e.printStackTrace();
                                 showNotification("Əsas tətbiqi başladmaq mümkün olmadı", false);
                             }
+                        } else {
+                            showNotification("İstifadəçi adı və ya şifrə yanlışdır", false);
                         }
                     });
 
@@ -199,7 +257,7 @@ public class LoginPage extends Application {
                 "; -fx-text-fill: white; -fx-padding: 14 28; -fx-background-radius: 12; -fx-font-size: 16;");
         notification.setWrapText(true);
         notification.setMaxWidth(400);
-        notification.setAlignment(Pos.TOP_CENTER);
+        notification.setAlignment(Pos.CENTER);
         notification.setOpacity(0);
 
         notificationBox.getChildren().add(notification);

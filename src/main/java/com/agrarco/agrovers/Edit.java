@@ -11,6 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
@@ -73,7 +74,8 @@ public class Edit {
     private TextField doluCekiAuto;
     private TextField bosCekiAuto;
     private TextField netCekiAuto;
-
+    private ObservableList<MiniPurchase> miniPurchaseList = FXCollections.observableArrayList();
+    TableView<MiniPurchase> miniTable = new TableView<>(miniPurchaseList);
     private Label tedarukcuLabel = new Label("Tədarükçü:");
     private Label regionLabel = new Label("Region:");
 
@@ -243,6 +245,7 @@ public class Edit {
             tedarukcuBox.setDisable(true);
 
         }
+        loadMiniPurchasesForPurchase(p.getId());
     }
     private void updatePurchaseToApi(HelloApplication.Purchase purchase, long purchaseId) {
         Task<Void> task = new Task<>() {
@@ -398,20 +401,6 @@ public class Edit {
 
         manualToggle = new CheckBox("Manual çəki");
         manualToggle.setFont(Font.font("Arial", 16));
-        manualToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                doluCekiManual.clear();
-                bosCekiManual.clear();
-                netCekiManual.clear();
-                doluContainer.getChildren().setAll(doluCekiManual);
-                bosContainer.getChildren().setAll(bosCekiManual);
-                netContainer.getChildren().setAll(netCekiManual);
-            } else {
-                doluContainer.getChildren().setAll(doluCekiAuto);
-                bosContainer.getChildren().setAll(bosCekiAuto);
-                netContainer.getChildren().setAll(netCekiAuto);
-            }
-        });
 
         TextField[] fields = {neqliyyatField, kiseSayiField, birKiseField,birPaletField,paletSayiField};
         for (TextField tf : fields) {
@@ -472,6 +461,35 @@ public class Edit {
         formLayout.add(bosContainer, 3, row);
         formLayout.add(new Label("NET ÇƏKİ:"), 4, row);
         formLayout.add(netContainer, 5, row);
+
+        MiniPurchaseTable miniTableHelper = new MiniPurchaseTable();
+        VBox miniSection = miniTableHelper.createMiniPurchaseSection(
+                doluCekiManual, kiseSayiField, birKiseField, paletSayiField, birPaletField
+        );
+        miniPurchaseList = miniTableHelper.getMiniPurchases(); // <-- link your list
+        miniTable.setItems(miniPurchaseList); // make sure the TableView in Edit uses this list
+        miniTable.refresh();
+
+        row++;
+        formLayout.add(miniSection, 1, row, 5, 1);
+
+        miniSection.setVisible(true);
+        manualToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                doluContainer.getChildren().setAll(doluCekiAuto);
+                bosContainer.getChildren().setAll(bosCekiAuto);
+                netContainer.getChildren().setAll(netCekiAuto);
+                miniSection.setVisible(false);
+            } else {
+                doluCekiManual.clear();
+                bosCekiManual.clear();
+                netCekiManual.clear();
+                doluContainer.getChildren().setAll(doluCekiManual);
+                bosContainer.getChildren().setAll(bosCekiManual);
+                netContainer.getChildren().setAll(netCekiManual);
+                miniSection.setVisible(true);
+            }
+        });
 
         Button backButton = new Button("Geri");
         HelloApplication.styleButtonGrey(backButton);
@@ -568,6 +586,48 @@ public class Edit {
         formContainer.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         formScene = new Scene(formContainer);
+    }
+    private void loadMiniPurchasesForPurchase(long purchaseId) {
+        Task<List<MiniPurchase>> task = new Task<>() {
+            @Override
+            protected List<MiniPurchase> call() throws Exception {
+                URL url = new URL("http://localhost:8080/api/minipurchase/byPurchase/" + purchaseId);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+
+                if (conn.getResponseCode() == 200) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    JavaTimeModule module = new JavaTimeModule();
+                    module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+                    module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.registerModule(module);
+                    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+                    return Arrays.asList(mapper.readValue(conn.getInputStream(), MiniPurchase[].class));
+
+                } else {
+                    throw new RuntimeException("Failed to fetch MiniPurchases: " + conn.getResponseCode());
+                }
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<MiniPurchase> miniPurchases = task.getValue();
+            // ✅ Populate your table or fields
+            miniPurchaseList.clear();
+            miniPurchaseList.addAll(miniPurchases);
+            System.out.println("Loaded " + miniPurchases.size() + " mini purchases for purchaseId=" + purchaseId);
+            tableView.refresh();
+
+        });
+
+        task.setOnFailed(e -> task.getException().printStackTrace());
+        miniTable.setItems(miniPurchaseList);
+
+        new Thread(task).start();
     }
 
     private void setupIntegerField(TextField field) {

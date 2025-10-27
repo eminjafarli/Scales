@@ -6,6 +6,7 @@ import com.agrarco.agrovers.Models.Menteqe;
 import com.agrarco.agrovers.Models.Tedarukcu;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -18,6 +19,8 @@ import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.agrarco.agrovers.Models.Region;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.image.ImageView;
@@ -26,6 +29,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -75,6 +79,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -82,6 +87,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public class HelloApplication extends Application {
     TableColumn<Purchase, String> regionCol;
@@ -110,12 +116,32 @@ public class HelloApplication extends Application {
     private Label tedarukcuLabel = new Label("Tədarükçü:");
     private Label regionLabel = new Label("Region:");
     private Label doluLabel = new Label("dolu");
+    private ObservableList<MiniPurchase> miniPurchaseList = FXCollections.observableArrayList();
+
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
 
         // ------------------ MAIN SCENE ------------------
-        VBox leftBox = new VBox(20);
+        Button yeniAlis = new Button("Yeni alış");
+        Button alisSiyahisi = new Button("Alış siyahısı");
+
+        VBox leftBox = createStyledBox("", "img_2.png", "#2E8B57", yeniAlis, alisSiyahisi);
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.rgb(0, 0, 0, 0.25)); // black with 25% opacity
+        shadow.setRadius(10);
+        shadow.setOffsetX(3);
+        shadow.setOffsetY(3);
+
+        leftBox.setEffect(shadow);
+        Button yeniLepeAlis = new Button("Yeni alış");
+        Button lepeAlisSiyahisi = new Button("Alış siyahısı");
+        VBox middleBox = createStyledBox("", "img_3.png", "#3CC258", yeniLepeAlis, lepeAlisSiyahisi);
+
+        Button qabiqSatis = new Button("Yeni satış");
+        Button satisSiyahisi = new Button("Satış siyahısı");
+        VBox rightBox = createStyledBox("", "img_1.png", "#28A745", qabiqSatis, satisSiyahisi);
+
         leftBox.setAlignment(Pos.TOP_CENTER);
         leftBox.setPadding(new Insets(20));
         leftBox.setMaxHeight(220);
@@ -126,13 +152,11 @@ public class HelloApplication extends Application {
         leftTitle.setFont(Font.font("Arial", 28));
         leftTitle.setTextFill(Color.DARKGREEN);
 
-        Button yeniAlis = new Button("Yeni alış");
-        Button alisSiyahisi = new Button("Alış siyahısı");
-        styleButtonGreen(yeniAlis);
-        styleButtonGreen(alisSiyahisi);
+        yeniAlis.getStyleClass().add("main-button");
+        alisSiyahisi.getStyleClass().add("main-button");
 
         Button logoutButton = new Button("Çıxış");
-        styleButtonRed(logoutButton);
+        logoutButton.getStyleClass().add("red-button");
         logoutButton.setOnAction(e -> {
             Stage stage = (Stage) logoutButton.getScene().getWindow();
             stage.close();
@@ -150,38 +174,32 @@ public class HelloApplication extends Application {
         leftBox.getChildren().addAll(leftTitle, yeniAlis, alisSiyahisi);
 
 // ------------------ MIDDLE BOX (Ləpə alışı) ------------------
-        VBox middleBox = new VBox(20);
         middleBox.setAlignment(Pos.TOP_CENTER);
         middleBox.setPadding(new Insets(20));
         middleBox.setMaxHeight(220);
         middleBox.setMinWidth(300);
         middleBox.setBackground(new Background(new BackgroundFill(Color.web("#F7F7F9"), new CornerRadii(10), Insets.EMPTY)));
-
+        middleBox.setEffect(shadow);
         Label middleTitle = new Label("Ləpə alışı");
         middleTitle.setFont(Font.font("Arial", 28));
         middleTitle.setTextFill(Color.web("#2E8B57"));
 
-        Button yeniLepeAlis = new Button("Yeni alış");
-        Button lepeAlisSiyahisi = new Button("Alış siyahısı");
         styleButtonGreen(yeniLepeAlis);
         styleButtonGreen(lepeAlisSiyahisi);
 
         middleBox.getChildren().addAll(middleTitle, yeniLepeAlis, lepeAlisSiyahisi);
 
 // ------------------ RIGHT BOX ------------------
-        VBox rightBox = new VBox(20);
         rightBox.setAlignment(Pos.TOP_CENTER);
         rightBox.setPadding(new Insets(20));
         rightBox.setMaxHeight(220);
         rightBox.setMinWidth(300);
         rightBox.setBackground(new Background(new BackgroundFill(Color.web("#F7F7F9"), new CornerRadii(10), Insets.EMPTY)));
-
+        rightBox.setEffect(shadow);
         Label rightTitle = new Label("Qabıq satışı");
         rightTitle.setFont(Font.font("Arial", 28));
         rightTitle.setTextFill(Color.web("#3CC258"));
 
-        Button qabiqSatis = new Button("Yeni satış");
-        Button satisSiyahisi = new Button("Satış siyahısı");
         styleButtonLightGreen(qabiqSatis);
         styleButtonLightGreen(satisSiyahisi);
 
@@ -194,19 +212,20 @@ public class HelloApplication extends Application {
         mainLayout.setAlignment(Pos.CENTER);
         mainLayout.setPadding(new Insets(-30, 0, 0, 0));
         mainLayout.getChildren().addAll(leftBox, middleBox, rightBox);
-        mainLayout.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        mainLayout.setBackground(new Background(new BackgroundFill(Color.web("#E9FFE7"), CornerRadii.EMPTY, Insets.EMPTY)));
 
         BorderPane mainPane = new BorderPane();
         mainPane.setCenter(mainLayout);
 
         HBox topBar = new HBox();
         topBar.setAlignment(Pos.TOP_LEFT);
-        topBar.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        topBar.setBackground(new Background(new BackgroundFill(Color.web("#E9FFE7"), CornerRadii.EMPTY, Insets.EMPTY)));
         topBar.setPadding(new Insets(20, 0, 0, 20));
         topBar.getChildren().add(logoutButton);
 
         mainPane.setTop(topBar);
         Scene mainScene = new Scene(mainPane);
+        mainScene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
 
         // ------------------ FORM SCENE ------------------
         GridPane formLayout = new GridPane();
@@ -216,7 +235,7 @@ public class HelloApplication extends Application {
         formLayout.setVgap(12);
         formLayout.setAlignment(Pos.CENTER);
         formLayout.setPadding(new Insets(30));
-        formLayout.setBackground(new Background(new BackgroundFill(Color.web("#F7F7F9"), new CornerRadii(10), Insets.EMPTY)));
+        formLayout.setBackground(new Background(new BackgroundFill(Color.web("#E9FFE7"), new CornerRadii(10), Insets.EMPTY)));
 
         Font inputFont = Font.font("Arial", 16);
         Edit edit = new Edit(primaryStage, tableScene, tableView, purchaseList,loggedInRole);
@@ -326,16 +345,7 @@ public class HelloApplication extends Application {
 
         CheckBox manualToggle = new CheckBox("Manual çəki");
         manualToggle.setFont(Font.font("Arial", 16));
-        manualToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                doluCekiManual.clear();
-                bosCekiManual.clear();
-                netCekiManual.clear();
-                doluContainer.getChildren().setAll(doluCekiManual);
-            } else {
-                doluContainer.getChildren().setAll(doluCekiAuto);
-            }
-        });
+
 
         TextField[] fields = {tarixField, neqliyyatField, kiseSayiField, birKiseField,paletSayiField,birPaletField};
         for (TextField tf : fields) {
@@ -391,6 +401,19 @@ public class HelloApplication extends Application {
         formLayout.add(doluLabel, 0, row);
         formLayout.add(doluContainer, 1, row);
 
+        // Create the MiniPurchase table section
+        MiniPurchaseTable miniTableSection = new MiniPurchaseTable();
+        VBox miniPurchasesBox = miniTableSection.createMiniPurchaseSection(
+                doluCekiManual,  // or doluCekiAuto if using auto field
+                kiseSayiField,
+                birKiseField,
+                paletSayiField,
+                birPaletField
+        );
+
+        row++;
+        formLayout.add(miniPurchasesBox, 0, row, 6, 1);  // span all 6 columns
+
         // ------------------ BUTTONS ------------------
         Button saveButton = new Button("Yadda saxla");
         Button resetButton = new Button("Reset");
@@ -420,13 +443,26 @@ public class HelloApplication extends Application {
         formLayout.add(buttonBar, 0, row, 6, 1);
 
         VBox formContainer = new VBox(formLayout);
+        FadeTransition formFade = new FadeTransition(Duration.seconds(0.5), formContainer);
+        formFade.setFromValue(0);
+        formFade.setToValue(1);
+        formFade.play();
+
+        ScaleTransition formScale = new ScaleTransition(Duration.seconds(0.5), formContainer);
+        formScale.setFromX(0.95);
+        formScale.setFromY(0.95);
+        formScale.setToX(1);
+        formScale.setToY(1);
+        formScale.play();
         formContainer.prefWidthProperty().bind(primaryStage.widthProperty());
         formContainer.prefHeightProperty().bind(primaryStage.heightProperty());
         formContainer.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         Scene formScene = new Scene(formContainer);
+        formScene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         BorderPane tableLayout = new BorderPane();
         tableScene = createPurchaseTableScene(primaryStage, mainScene, formScene);
+        tableScene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
 
         tableLayout.prefWidthProperty().bind(primaryStage.widthProperty());
         tableLayout.prefHeightProperty().bind(primaryStage.heightProperty());
@@ -438,6 +474,21 @@ public class HelloApplication extends Application {
         tableLayout.setCenter(tableView);
 
         startScaleReader();
+        miniPurchasesBox.setVisible(true);
+
+
+        manualToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                doluContainer.getChildren().setAll(doluCekiAuto);
+                miniPurchasesBox.setVisible(false);
+            } else {
+                doluCekiManual.clear();
+                bosCekiManual.clear();
+                netCekiManual.clear();
+                doluContainer.getChildren().setAll(doluCekiManual);
+                miniPurchasesBox.setVisible(true);
+            }
+        });
 
         alisSiyahisi.setOnAction(e -> {
             type = "FA";
@@ -575,6 +626,7 @@ public class HelloApplication extends Application {
             kiseSayiField.clear();
             birKiseField.clear();
             paletSayiField.clear();
+            miniPurchaseList.clear();
             birPaletField.clear();
             menteqeBox.getSelectionModel().clearSelection();
             regionBox.getSelectionModel().clearSelection();
@@ -594,11 +646,16 @@ public class HelloApplication extends Application {
                 LocalDateTime doluTarix = LocalDateTime.now();
                 LocalDateTime bosTarix = null;
                 String lot = fetchNewLot();
-                Purchase purchase = new Purchase(loggedInName,-1,
+
+                Purchase purchase = new Purchase(
+                        loggedInName, -1,
                         neqliyyatField.getText(), lot,
                         menteqeBox.getValue(), regionBox.getValue(), anbarBox.getValue(), tedarukcuBox.getValue(),
-                        Integer.parseInt(kiseSayiField.getText()), Double.parseDouble(birKiseField.getText()),Double.parseDouble(birPaletField.getText()),
-                        Integer.parseInt(paletSayiField.getText()),parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText()),
+                        Integer.parseInt(kiseSayiField.getText()),
+                        Double.parseDouble(birKiseField.getText()),
+                        Double.parseDouble(birPaletField.getText()),
+                        Integer.parseInt(paletSayiField.getText()),
+                        parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText()),
                         parseDoubleSafe(manualToggle.isSelected() ? bosCekiManual.getText() : "0.0"),
                         parseDoubleSafe(manualToggle.isSelected() ? netCekiManual.getText() : "0.0"),
                         qeydArea.getText(), doluTarix, bosTarix
@@ -607,13 +664,37 @@ public class HelloApplication extends Application {
                 Task<Void> task = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        sendPurchaseToApi(purchase);
+                        // 1️⃣ Send main Purchase and get only the backend-generated ID
+                        long purchaseId = sendPurchaseToApi(purchase); // now returns long
+
+                        // 2️⃣ Create MiniPurchase and attach correct Purchase ID
+                        MiniPurchase miniPurchase = new MiniPurchase(
+                                0,
+                                purchaseId, // ✅ Use real backend ID
+                                doluTarix,
+                                parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText()),
+                                Integer.parseInt(kiseSayiField.getText()),
+                                Double.parseDouble(birKiseField.getText()),
+                                Integer.parseInt(paletSayiField.getText()),
+                                Double.parseDouble(birPaletField.getText())
+                        );
+
+                        System.out.println("===== MiniPurchase Data =====");
+                        System.out.println("purchaseId: " + miniPurchase.getPurchaseId());
+                        System.out.println("=============================");
+
+                        // 3️⃣ Send MiniPurchase to backend
+                        sendMiniPurchaseToApi(miniPurchase);
+
+                        // 4️⃣ Keep it in memory
+                        miniPurchaseList.add(miniPurchase);
+
                         return null;
                     }
                 };
 
                 task.setOnSucceeded(ev -> {
-                    purchaseList.add(purchase);
+                    // Clear UI fields
                     tarixField.clear();
                     neqliyyatField.clear();
                     kiseSayiField.clear();
@@ -628,9 +709,10 @@ public class HelloApplication extends Application {
                     doluCekiManual.clear();
                     bosCekiManual.clear();
                     netCekiManual.clear();
+                    miniPurchaseList.clear();
                     manualToggle.setSelected(false);
 
-                    System.out.println("Məlumat yadda saxlanıldı: Lot=" + lotNomresi + ", Nəqliyyat=" + neqliyyatNomresi);
+                    System.out.println("Məlumat yadda saxlanıldı: Lot=" + lot + ", Nəqliyyat=" + neqliyyatField.getText());
                     primaryStage.setScene(tableScene);
                     loadPurchasesFromApi();
                 });
@@ -644,6 +726,11 @@ public class HelloApplication extends Application {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
+
+            System.out.println("menteqeBox value: " + menteqeBox.getValue() + " (" + menteqeBox.getValue().getClass() + ")");
+            System.out.println("regionBox value: " + regionBox.getValue() + " (" + regionBox.getValue().getClass() + ")");
+            System.out.println("anbarBox value: " + anbarBox.getValue() + " (" + anbarBox.getValue().getClass() + ")");
+            System.out.println("tedarukcuBox value: " + tedarukcuBox.getValue() + " (" + tedarukcuBox.getValue().getClass() + ")");
         });
 
 
@@ -660,6 +747,8 @@ public class HelloApplication extends Application {
             anbarBox.getSelectionModel().clearSelection();
             tedarukcuBox.getSelectionModel().clearSelection();
             qeydArea.clear();
+            miniPurchaseList.clear();
+            miniPurchasesBox.setVisible(false);
 
             doluCekiManual.clear();
             bosCekiManual.clear();
@@ -670,6 +759,18 @@ public class HelloApplication extends Application {
         primaryStage.setScene(mainScene);
         primaryStage.setMaximized(true);
         primaryStage.show();
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), mainLayout);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.play();
+
+        ScaleTransition pop = new ScaleTransition(Duration.seconds(0.5), mainLayout);
+        pop.setFromX(0.95);
+        pop.setFromY(0.95);
+        pop.setToX(1);
+        pop.setToY(1);
+        pop.play();
+
     }
 
     private boolean canShowAlertInt = true;
@@ -802,15 +903,59 @@ public class HelloApplication extends Application {
         });
     }
 
-    private void sendPurchaseToApi(Purchase purchase) {
+    private long sendPurchaseToApi(Purchase purchase) throws Exception {
+        URL url = new URL("http://localhost:8080/api/purchases");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+
+        // ObjectMapper with LocalDateTime formatting
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        JavaTimeModule module = new JavaTimeModule();
+        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(module);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        // --- Send Purchase ---
+        String json = mapper.writeValueAsString(purchase);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(json.getBytes(StandardCharsets.UTF_8));
+        }
+
+        int code = conn.getResponseCode();
+        if (code == 200 || code == 201) {
+            try (InputStream is = conn.getInputStream()) {
+                // Read raw JSON response
+                String response = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+                System.out.println("Raw backend response: " + response);
+
+                // Parse only the 'id' field
+                JsonNode node = mapper.readTree(response);
+                long purchaseId = node.get("id").asLong();
+                System.out.println("✅ Purchase saved successfully, ID = " + purchaseId);
+                return purchaseId;
+            }
+        } else {
+            throw new RuntimeException("Failed to save Purchase: HTTP " + code);
+        }
+    }
+
+
+    private void sendMiniPurchaseToApi(MiniPurchase miniPurchase) {
         try {
-            URL url = new URL("http://localhost:8080/api/purchases");
+            URL url = new URL("http://localhost:8080/api/minipurchase/add");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            // ---- CUSTOM OBJECTMAPPER WITH FORMATTER ----
+            // ObjectMapper with date handling
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             JavaTimeModule module = new JavaTimeModule();
             module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
@@ -819,25 +964,23 @@ public class HelloApplication extends Application {
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(module);
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            String json = mapper.writeValueAsString(purchase);
-            System.out.println("Sending JSON to API: " + json);
 
-
+            // --- Send MiniPurchase ---
+            String json = mapper.writeValueAsString(miniPurchase);
+            System.out.println("Sending MiniPurchase JSON to API: " + json);
 
             try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = json.getBytes("utf-8");
-                os.write(input, 0, input.length);
+                os.write(json.getBytes(StandardCharsets.UTF_8));
             }
 
             int code = conn.getResponseCode();
             if (code == 200 || code == 201) {
-                System.out.println("Purchase saved to DB successfully");
+                System.out.println("✅ MiniPurchase saved to DB successfully");
             } else {
-                System.out.println("Failed to save purchase: " + code);
+                System.out.println("❌ Failed to save MiniPurchase: HTTP " + code);
             }
 
             conn.disconnect();
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -861,6 +1004,71 @@ public class HelloApplication extends Application {
 
     private boolean canShowAlert = true;
 
+    private VBox createStyledBox(String titleText, String imagePath, String colorHex, Button... buttons) {
+        VBox box = new VBox(15);
+        box.setAlignment(Pos.TOP_CENTER);
+        box.setPadding(new Insets(20));
+        box.setMinWidth(300);
+        box.setMaxHeight(220);
+
+        // Create a Label as the title
+        Label title = new Label(titleText);
+        title.setFont(Font.font("Arial", 28));
+        title.setTextFill(Color.WHITE); // Title in white for contrast
+
+        // Add buttons
+        for (Button btn : buttons) {
+            btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;"); // optional style
+        }
+
+        // StackPane to put background image behind content
+        StackPane stack = new StackPane();
+
+        // 🔥 Load background image safely
+        javafx.scene.image.Image bgImage = null;
+        try {
+            bgImage = new javafx.scene.image.Image(getClass().getResource(imagePath).toExternalForm());
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not load image: " + imagePath);
+        }
+
+// Create ImageView and add to StackPane
+        javafx.scene.image.ImageView bg = new javafx.scene.image.ImageView();
+        if (bgImage != null) {
+            bg.setImage(bgImage);
+            bg.setFitWidth(300);   // adjust width
+            bg.setFitHeight(220);  // adjust height
+            bg.setPreserveRatio(true);
+        }
+
+        javafx.scene.layout.StackPane stack1 = new javafx.scene.layout.StackPane();
+        stack1.getChildren().add(bg);
+        stack1.setMaxWidth(300);
+        stack1.setMaxHeight(220);
+        Rectangle clip = new Rectangle(bg.getFitWidth(), bg.getFitHeight());
+        clip.setArcWidth(30);   // corner radius X
+        clip.setArcHeight(30);  // corner radius Y
+        bg.setClip(clip);
+
+        // Overlay a colored semi-transparent layer for better readability
+        Rectangle overlay = new Rectangle(300, 220, Color.web("transparent"));
+        overlay.setArcWidth(20);
+        overlay.setArcHeight(20);
+        bg.setPreserveRatio(false);
+
+        VBox content = new VBox(10, title);
+        content.getChildren().addAll(buttons);
+        content.setAlignment(Pos.TOP_CENTER);
+
+        stack1.getChildren().addAll(overlay, content);
+
+        box.getChildren().add(stack1);
+        return box;
+    }
+
+
+
     private void setupNeqliyyatField(TextField neqliyyatField) {
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String text = change.getControlNewText().toUpperCase();
@@ -882,11 +1090,9 @@ public class HelloApplication extends Application {
     }
 
     private Scene createPurchaseTableScene(Stage primaryStage, Scene mainScene, Scene formScene) {
-
         if (tableView == null) {
             tableView = new TableView<>(purchaseList);
         }
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
         TableColumn<Purchase, String> lotCol = new TableColumn<>("Lot");
@@ -1274,7 +1480,7 @@ public class HelloApplication extends Application {
         layout.setCenter(tableView);
         layout.setBottom(bottomPanel1);
         layout.setPadding(new Insets(55));
-
+        layout.setStyle("-fx-background-color: #E9FFE7;");
         layout.prefWidthProperty().bind(primaryStage.widthProperty());
         layout.prefHeightProperty().bind(primaryStage.heightProperty());
 
@@ -1823,7 +2029,7 @@ public class HelloApplication extends Application {
                         "-fx-focus-color: transparent;" +
                         "-fx-faint-focus-color: transparent;"
         );
-        tf.setMinHeight(62);
+        tf.setMinHeight(45);
     }
 
     public static void styleTextArea(TextArea area) {
@@ -1839,7 +2045,7 @@ public class HelloApplication extends Application {
                         "-fx-focus-color: transparent;" +
                         "-fx-faint-focus-color: transparent;"
         );
-        area.setMinHeight(300);
+        area.setMinHeight(80);
     }
 
     public static void styleReadOnly(TextField tf) {
@@ -1856,7 +2062,7 @@ public class HelloApplication extends Application {
                         "-fx-focus-color: transparent;" +
                         "-fx-faint-focus-color: transparent;"
         );
-        tf.setMinHeight(62);
+        tf.setMinHeight(45);
         tf.setMinWidth(221);
     }
 
@@ -1867,13 +2073,17 @@ public class HelloApplication extends Application {
                         "-fx-border-color: #323232;" +
                         "-fx-border-radius: 8;" +
                         "-fx-background-radius: 8;" +
-                        "-fx-padding: 8 12 8 12;" +
-                        "-fx-font-size: 15;" +
+                        "-fx-padding: 4 8 4 8;" +
+                        "-fx-font-size: 13;" +
                         "-fx-background-insets: 0;" +
                         "-fx-focus-color: transparent;" +
                         "-fx-faint-focus-color: transparent;"
         );
-        comboBox.setPrefSize(240, 20);
+        comboBox.setPrefWidth(240);
+        comboBox.setPrefHeight(45);
+        comboBox.setMinHeight(45);
+        comboBox.setMaxHeight(45);
+
 
         Callback<ListView<String>, ListCell<String>> cellFactory = listView -> new ListCell<>() {
             @Override

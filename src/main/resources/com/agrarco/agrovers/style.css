@@ -1,0 +1,67 @@
+.root {
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-background-color: white;
+}
+
+.vbox-card {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 15;
+    -fx-padding: 25;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 4);
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+.vbox-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(60, 194, 88, 0.4), 25, 0, 0, 8);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.main-button {
+    -fx-background-color: linear-gradient(to right, #2E8B57, #3CC258);
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 6, 0, 0, 3);
+    -fx-border-color: transparent;
+}
+
+.main-button:hover {
+    -fx-background-color: linear-gradient(to right, #3CC258, #4EE176);
+}
+
+.red-button {
+    -fx-background-color: #E74C3C;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.red-button:hover {
+    -fx-background-color: #FF6655;
+}
+
+.combo-box {
+    -fx-background-radius: 8;
+    -fx-border-color: #2E8B57;
+    -fx-border-radius: 8;
+    -fx-padding: 5;
+}
+
+.text-field, .text-area {
+    -fx-background-color: #FAFAFA;
+    -fx-border-color: #BDBDBD;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: #3CC258;
+    -fx-effect: dropshadow(gaussian, rgba(60,194,88,0.3), 8, 0, 0, 0);
+}
+
