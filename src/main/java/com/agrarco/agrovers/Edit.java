@@ -296,6 +296,7 @@ public class Edit {
     // ------------------ UI BUILD ------------------
     private void buildFormScene() throws IOException, InterruptedException {
         GridPane formLayout = new GridPane();
+        formLayout.setBackground(new Background(new BackgroundFill(Color.web("#E9FFE7"), new CornerRadii(10), Insets.EMPTY)));
         formLayout.prefWidthProperty().bind(primaryStage.widthProperty());
         formLayout.prefHeightProperty().bind(primaryStage.heightProperty());
         formLayout.setHgap(8);
@@ -466,8 +467,8 @@ public class Edit {
         VBox miniSection = miniTableHelper.createMiniPurchaseSection(
                 doluCekiManual, kiseSayiField, birKiseField, paletSayiField, birPaletField
         );
-        miniPurchaseList = miniTableHelper.getMiniPurchases(); // <-- link your list
-        miniTable.setItems(miniPurchaseList); // make sure the TableView in Edit uses this list
+        miniPurchaseList = miniTableHelper.getMiniPurchases();
+        miniTable.setItems(miniPurchaseList);
         miniTable.refresh();
 
         row++;
@@ -616,7 +617,6 @@ public class Edit {
 
         task.setOnSucceeded(e -> {
             List<MiniPurchase> miniPurchases = task.getValue();
-            // ✅ Populate your table or fields
             miniPurchaseList.clear();
             miniPurchaseList.addAll(miniPurchases);
             System.out.println("Loaded " + miniPurchases.size() + " mini purchases for purchaseId=" + purchaseId);

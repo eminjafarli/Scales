@@ -23,6 +23,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.VPos;
 import javafx.scene.image.ImageView;
 import javafx.scene.Scene;
 import javafx.scene.image.WritableImage;
@@ -30,6 +31,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -113,8 +115,8 @@ public class HelloApplication extends Application {
     private ComboBox<String> menteqeBox;
     private ComboBox<String> anbarBox;
     private ComboBox<String> tedarukcuBox;
-    private Label tedarukcuLabel = new Label("Tədarükçü:");
-    private Label regionLabel = new Label("Region:");
+    private Label tedarukcuLabel = new Label("Tədarükçü *");
+    Node regionLabel = colorStars("Region: *");
     private Label doluLabel = new Label("dolu");
     private ObservableList<MiniPurchase> miniPurchaseList = FXCollections.observableArrayList();
 
@@ -122,13 +124,14 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
 
+        primaryStage.getIcons().add(new javafx.scene.image.Image(Objects.requireNonNull(getClass().getResourceAsStream("agrarco.png"))));
         // ------------------ MAIN SCENE ------------------
         Button yeniAlis = new Button("Yeni alış");
         Button alisSiyahisi = new Button("Alış siyahısı");
 
         VBox leftBox = createStyledBox("", "img_2.png", "#2E8B57", yeniAlis, alisSiyahisi);
         DropShadow shadow = new DropShadow();
-        shadow.setColor(Color.rgb(0, 0, 0, 0.25)); // black with 25% opacity
+        shadow.setColor(Color.rgb(0, 0, 0, 0.25));
         shadow.setRadius(10);
         shadow.setOffsetX(3);
         shadow.setOffsetY(3);
@@ -136,7 +139,7 @@ public class HelloApplication extends Application {
         leftBox.setEffect(shadow);
         Button yeniLepeAlis = new Button("Yeni alış");
         Button lepeAlisSiyahisi = new Button("Alış siyahısı");
-        VBox middleBox = createStyledBox("", "img_3.png", "#3CC258", yeniLepeAlis, lepeAlisSiyahisi);
+        VBox middleBox = createStyledBox("", "lepe.JPG", "#3CC258", yeniLepeAlis, lepeAlisSiyahisi);
 
         Button qabiqSatis = new Button("Yeni satış");
         Button satisSiyahisi = new Button("Satış siyahısı");
@@ -218,12 +221,12 @@ public class HelloApplication extends Application {
         mainPane.setCenter(mainLayout);
 
         HBox topBar = new HBox();
-        topBar.setAlignment(Pos.TOP_LEFT);
+        topBar.setAlignment(Pos.BOTTOM_RIGHT);
         topBar.setBackground(new Background(new BackgroundFill(Color.web("#E9FFE7"), CornerRadii.EMPTY, Insets.EMPTY)));
-        topBar.setPadding(new Insets(20, 0, 0, 20));
+        topBar.setPadding(new Insets(0, 20, 20, 0));
         topBar.getChildren().add(logoutButton);
 
-        mainPane.setTop(topBar);
+        mainPane.setBottom(topBar);
         Scene mainScene = new Scene(mainPane);
         mainScene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
 
@@ -363,33 +366,33 @@ public class HelloApplication extends Application {
         // ------------------ ADD FIELDS TO GRID ------------------
         int row = 0;
 
-        formLayout.add(new Label("Nəqliyyatın nömrəsi:"), 0, row);
+        formLayout.add(colorStars("Nəqliyyatın nömrəsi *"), 0, row);
         formLayout.add(createClearableField(neqliyyatField), 1, row);
         formLayout.add(manualToggle, 3, row);
 
         row++;
-        formLayout.add(new Label("Məntəqə:"), 0, row);
+        formLayout.add(colorStars("Məntəqə *"), 0, row);
         formLayout.add(menteqeBox, 1, row);
         formLayout.add(regionLabel, 2, row);
         formLayout.add(regionBox, 3, row);
 
 
         row++;
-        formLayout.add(new Label("Anbar:"), 0, row);
+        formLayout.add(colorStars("Anbar *"), 0, row);
         formLayout.add(anbarBox, 1, row);
         formLayout.add(tedarukcuLabel, 2, row);
         formLayout.add(tedarukcuBox, 3, row);
 
         row++;
-        formLayout.add(new Label("Kisə sayı (ədəd):"), 0, row);
+        formLayout.add(colorStars("Kisə sayı (ədəd) *"), 0, row);
         formLayout.add(createClearableField(kiseSayiField), 1, row);
-        formLayout.add(new Label("Bir kisənin çəkisi (q):"), 2, row);
+        formLayout.add(colorStars("Bir kisənin çəkisi (q) *"), 2, row);
         formLayout.add(createClearableField(birKiseField), 3, row);
 
         row++;
-        formLayout.add(new Label("Palet sayı (ədəd):"), 0, row);
+        formLayout.add(colorStars("Palet sayı (ədəd) *"), 0, row);
         formLayout.add(createClearableField(paletSayiField), 1, row);
-        formLayout.add(new Label("Bir Paletin çəkisi (q):"), 2, row);
+        formLayout.add(colorStars("Bir Paletin çəkisi (q) *"), 2, row);
         formLayout.add(createClearableField(birPaletField), 3, row);
 
         row++;
@@ -401,10 +404,10 @@ public class HelloApplication extends Application {
         formLayout.add(doluLabel, 0, row);
         formLayout.add(doluContainer, 1, row);
 
-        // Create the MiniPurchase table section
+
         MiniPurchaseTable miniTableSection = new MiniPurchaseTable();
         VBox miniPurchasesBox = miniTableSection.createMiniPurchaseSection(
-                doluCekiManual,  // or doluCekiAuto if using auto field
+                doluCekiManual,
                 kiseSayiField,
                 birKiseField,
                 paletSayiField,
@@ -412,7 +415,7 @@ public class HelloApplication extends Application {
         );
 
         row++;
-        formLayout.add(miniPurchasesBox, 0, row, 6, 1);  // span all 6 columns
+        formLayout.add(miniPurchasesBox, 0, row, 6, 1);
 
         // ------------------ BUTTONS ------------------
         Button saveButton = new Button("Yadda saxla");
@@ -497,14 +500,14 @@ public class HelloApplication extends Application {
             bosCol.setText("Boş çəki");
             doluCol.setText("Dolu çəki");
             doluLabel.setText("DOLU ÇƏKİ:");
-            tedarukcuLabel.setText("Tədarükçü:");
+            tedarukcuLabel.setText("Tədarükçü *");
             regionBox.setVisible(true);
             regionLabel.setVisible(true);
             regionBox.setValue(null);
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                if (region1 == null) return true; // keep null values
+                if (region1 == null) return true;
                 return !(region1.contains("QS") || region1.contains("LA"));
             });
 
@@ -514,7 +517,7 @@ public class HelloApplication extends Application {
 
         lepeAlisSiyahisi.setOnAction(e -> {
             type = "LA";
-            tedarukcuLabel.setText("Tədarükçü:");
+            tedarukcuLabel.setText("Tədarükçü *");
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             regionBox.setValue("LA");
@@ -526,7 +529,7 @@ public class HelloApplication extends Application {
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                if (region1 == null) return true; // keep null values
+                if (region1 == null) return true;
                 return region1.contains("LA");
             });
 
@@ -541,7 +544,7 @@ public class HelloApplication extends Application {
             bosCol.setText("Dolu çəki");
             doluCol.setText("Boş çəki");
             doluLabel.setText("BOS ÇƏKİ:");
-            tedarukcuLabel.setText("Alıcı:");
+            tedarukcuLabel.setText("Alıcı *");
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             regionBox.setValue("QS");
@@ -563,7 +566,7 @@ public class HelloApplication extends Application {
         yeniAlis.setOnAction(e -> {
             primaryStage.setScene(formScene);
             type = "FA";
-            tedarukcuLabel.setText("Tədarükçü:");
+            tedarukcuLabel.setText("Tədarükçü *");
             regionBox.setVisible(true);
             regionLabel.setVisible(true);
             regionBox.setValue(null);
@@ -575,14 +578,14 @@ public class HelloApplication extends Application {
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                if (region1 == null) return true; // keep null values
+                if (region1 == null) return true;
                 return !(region1.contains("QS") || region1.contains("LA"));
             });
         });
         yeniLepeAlis.setOnAction(e -> {
             primaryStage.setScene(formScene);
             type = "LA";
-            tedarukcuLabel.setText("Tədarükçü:");
+            tedarukcuLabel.setText("Tədarükçü *");
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             regionBox.setValue("LA");
@@ -594,7 +597,7 @@ public class HelloApplication extends Application {
 
             filteredData.setPredicate(p -> {
                 String region1 = p.getRegionBag();
-                if (region1 == null) return true; // keep null values
+                if (region1 == null) return true;
                 return region1.contains("LA");
             });
         });
@@ -602,7 +605,7 @@ public class HelloApplication extends Application {
             primaryStage.setScene(formScene);
             primaryStage.setMaximized(true);
             type = "QS";
-            tedarukcuLabel.setText("Alıcı:");
+            tedarukcuLabel.setText("Alıcı *");
             regionBox.setVisible(false);
             regionLabel.setVisible(false);
             regionBox.setValue("QS");
@@ -639,6 +642,7 @@ public class HelloApplication extends Application {
             netCekiManual.clear();
             manualToggle.setSelected(false);
             primaryStage.setScene(mainScene);
+            primaryStage.setMaximized(true);
         });
 
         saveButton.setOnAction(e -> {
@@ -664,13 +668,11 @@ public class HelloApplication extends Application {
                 Task<Void> task = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        // 1️⃣ Send main Purchase and get only the backend-generated ID
-                        long purchaseId = sendPurchaseToApi(purchase); // now returns long
+                        long purchaseId = sendPurchaseToApi(purchase);
 
-                        // 2️⃣ Create MiniPurchase and attach correct Purchase ID
                         MiniPurchase miniPurchase = new MiniPurchase(
                                 0,
-                                purchaseId, // ✅ Use real backend ID
+                                purchaseId,
                                 doluTarix,
                                 parseDoubleSafe(manualToggle.isSelected() ? doluCekiManual.getText() : doluCekiAuto.getText()),
                                 Integer.parseInt(kiseSayiField.getText()),
@@ -683,10 +685,8 @@ public class HelloApplication extends Application {
                         System.out.println("purchaseId: " + miniPurchase.getPurchaseId());
                         System.out.println("=============================");
 
-                        // 3️⃣ Send MiniPurchase to backend
                         sendMiniPurchaseToApi(miniPurchase);
 
-                        // 4️⃣ Keep it in memory
                         miniPurchaseList.add(miniPurchase);
 
                         return null;
@@ -694,7 +694,6 @@ public class HelloApplication extends Application {
                 };
 
                 task.setOnSucceeded(ev -> {
-                    // Clear UI fields
                     tarixField.clear();
                     neqliyyatField.clear();
                     kiseSayiField.clear();
@@ -910,7 +909,6 @@ public class HelloApplication extends Application {
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
-        // ObjectMapper with LocalDateTime formatting
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         JavaTimeModule module = new JavaTimeModule();
         module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
@@ -920,7 +918,6 @@ public class HelloApplication extends Application {
         mapper.registerModule(module);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        // --- Send Purchase ---
         String json = mapper.writeValueAsString(purchase);
         try (OutputStream os = conn.getOutputStream()) {
             os.write(json.getBytes(StandardCharsets.UTF_8));
@@ -929,13 +926,11 @@ public class HelloApplication extends Application {
         int code = conn.getResponseCode();
         if (code == 200 || code == 201) {
             try (InputStream is = conn.getInputStream()) {
-                // Read raw JSON response
                 String response = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
                         .lines()
                         .collect(Collectors.joining("\n"));
                 System.out.println("Raw backend response: " + response);
 
-                // Parse only the 'id' field
                 JsonNode node = mapper.readTree(response);
                 long purchaseId = node.get("id").asLong();
                 System.out.println("✅ Purchase saved successfully, ID = " + purchaseId);
@@ -955,7 +950,6 @@ public class HelloApplication extends Application {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            // ObjectMapper with date handling
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             JavaTimeModule module = new JavaTimeModule();
             module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
@@ -965,7 +959,6 @@ public class HelloApplication extends Application {
             mapper.registerModule(module);
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-            // --- Send MiniPurchase ---
             String json = mapper.writeValueAsString(miniPurchase);
             System.out.println("Sending MiniPurchase JSON to API: " + json);
 
@@ -1001,6 +994,25 @@ public class HelloApplication extends Application {
         cooldown.setOnFinished(e -> canShowAlert = true);
         cooldown.play();
     }
+    private Node colorStars(String text) {
+        TextFlow flow = new TextFlow();
+        for (char c : text.toCharArray()) {
+            javafx.scene.text.Text t = new javafx.scene.text.Text(String.valueOf(c));
+
+            if (c == '*') {
+                t.setFill(Color.RED);
+            }
+            flow.getChildren().add(t);
+        }
+        flow.setTextAlignment(javafx.scene.text.TextAlignment.RIGHT);
+        flow.setPadding(new Insets(12,0,0,10));
+        GridPane.setHalignment(flow, HPos.RIGHT);
+        GridPane.setValignment(flow, VPos.BOTTOM);
+
+
+        return flow;
+    }
+
 
     private boolean canShowAlert = true;
 
@@ -1011,21 +1023,17 @@ public class HelloApplication extends Application {
         box.setMinWidth(300);
         box.setMaxHeight(220);
 
-        // Create a Label as the title
         Label title = new Label(titleText);
         title.setFont(Font.font("Arial", 28));
-        title.setTextFill(Color.WHITE); // Title in white for contrast
+        title.setTextFill(Color.WHITE);
 
-        // Add buttons
         for (Button btn : buttons) {
             btn.setMaxWidth(Double.MAX_VALUE);
-            btn.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;"); // optional style
+            btn.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         }
 
-        // StackPane to put background image behind content
         StackPane stack = new StackPane();
 
-        // 🔥 Load background image safely
         javafx.scene.image.Image bgImage = null;
         try {
             bgImage = new javafx.scene.image.Image(getClass().getResource(imagePath).toExternalForm());
@@ -1033,12 +1041,11 @@ public class HelloApplication extends Application {
             System.err.println("⚠️ Could not load image: " + imagePath);
         }
 
-// Create ImageView and add to StackPane
         javafx.scene.image.ImageView bg = new javafx.scene.image.ImageView();
         if (bgImage != null) {
             bg.setImage(bgImage);
-            bg.setFitWidth(300);   // adjust width
-            bg.setFitHeight(220);  // adjust height
+            bg.setFitWidth(300);
+            bg.setFitHeight(220);
             bg.setPreserveRatio(true);
         }
 
@@ -1047,11 +1054,10 @@ public class HelloApplication extends Application {
         stack1.setMaxWidth(300);
         stack1.setMaxHeight(220);
         Rectangle clip = new Rectangle(bg.getFitWidth(), bg.getFitHeight());
-        clip.setArcWidth(30);   // corner radius X
-        clip.setArcHeight(30);  // corner radius Y
+        clip.setArcWidth(30);
+        clip.setArcHeight(30);
         bg.setClip(clip);
 
-        // Overlay a colored semi-transparent layer for better readability
         Rectangle overlay = new Rectangle(300, 220, Color.web("transparent"));
         overlay.setArcWidth(20);
         overlay.setArcHeight(20);
@@ -1095,17 +1101,44 @@ public class HelloApplication extends Application {
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-        TableColumn<Purchase, String> lotCol = new TableColumn<>("Lot");
-        lotCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getLotNomresi()));
-
-        TableColumn<Purchase, String> neqliyyatCol = new TableColumn<>("Nəqliyyat");
-        neqliyyatCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNeqliyyatNomresi()));
-
         TableColumn<Purchase, String> doluTarixCol = new TableColumn<>("Dolu Tarix");
         doluTarixCol.setCellValueFactory(data -> {
             LocalDateTime dt = data.getValue().getDoluTarix();
             return new SimpleStringProperty(dt != null ? dt.format(formatter) : "-");
         });
+
+        TableColumn<Purchase, String> lotCol = new TableColumn<>("Lot");
+        lotCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getLotNomresi()));
+
+
+        TableColumn<Purchase, String> menteqeCol = new TableColumn<>("Məntəqə");
+        menteqeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getMenteqe()));
+
+        regionCol = new TableColumn<>("Region/Bağ");
+        regionCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRegionBag()));
+
+        TableColumn<Purchase, String> anbarCol = new TableColumn<>("Anbar");
+        anbarCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAnbar()));
+
+        TableColumn<Purchase, String> neqliyyatCol = new TableColumn<>("Nəqliyyat");
+        neqliyyatCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNeqliyyatNomresi()));
+
+        if (!"FA".equalsIgnoreCase(type)) {
+            tedarukcuCol = new TableColumn<>("Tədarükçü");
+        }
+        else if(!"QS".equalsIgnoreCase(type)){
+            tedarukcuCol = new TableColumn<>("Alıcı");
+        }
+        tedarukcuCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTedarukcu()));
+
+        TableColumn<Purchase, Double> netCol = new TableColumn<>("Net çəki");
+        netCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getNetCeki()).asObject());
+
+        TableColumn<Purchase, String> qeydCol = new TableColumn<>("Qeyd");
+        qeydCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getQeyd()));
+
+        TableColumn<Purchase, String> userCol = new TableColumn<>("İstifadəçi");
+        userCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getLoggedInUser()));
 
         TableColumn<Purchase, String> bosTarixCol = new TableColumn<>("Boş Tarix");
         bosTarixCol.setCellValueFactory(data -> {
@@ -1117,9 +1150,6 @@ public class HelloApplication extends Application {
 
         bosCol = new TableColumn<>("Boş çəki");
         bosCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getBosCeki()).asObject().asString());
-
-        TableColumn<Purchase, Double> netCol = new TableColumn<>("Net çəki");
-        netCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getNetCeki()).asObject());
 
         TableColumn<Purchase, Integer> kiseCol = new TableColumn<>("Kisə sayı");
         kiseCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getKiseSayi()).asObject());
@@ -1133,34 +1163,20 @@ public class HelloApplication extends Application {
         TableColumn<Purchase, Double> birPaletCol = new TableColumn<>("Bir paletin çəkisi");
         birPaletCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getBirPaletinCekisi()).asObject());
 
-        TableColumn<Purchase, String> menteqeCol = new TableColumn<>("Məntəqə");
-        menteqeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getMenteqe()));
-
-        regionCol = new TableColumn<>("Region/Bağ");
-        regionCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRegionBag()));
-
-        TableColumn<Purchase, String> anbarCol = new TableColumn<>("Anbar");
-        anbarCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAnbar()));
-        if (!"FA".equalsIgnoreCase(type)) {
-            tedarukcuCol = new TableColumn<>("Tədarükçü");
-        }
-        else if(!"QS".equalsIgnoreCase(type)){
-            tedarukcuCol = new TableColumn<>("Alıcı");
-        }
-        tedarukcuCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTedarukcu()));
-
-        TableColumn<Purchase, String> userCol = new TableColumn<>("İstifadəçi");
-        userCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getLoggedInUser()));
-
-        TableColumn<Purchase, String> qeydCol = new TableColumn<>("Qeyd");
-        qeydCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getQeyd()));
-
-        tableView.getColumns().setAll(lotCol, neqliyyatCol, doluTarixCol, bosTarixCol, doluCol, bosCol, netCol, kiseCol, birKiseCol,paletCol,birPaletCol, menteqeCol, regionCol, anbarCol, tedarukcuCol, qeydCol,userCol);
+        tableView.getColumns().setAll(doluTarixCol, lotCol, menteqeCol, regionCol, anbarCol, neqliyyatCol, tedarukcuCol, netCol, qeydCol, userCol, bosTarixCol, doluCol, bosCol, kiseCol, birKiseCol,paletCol,birPaletCol);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         filteredData = new FilteredList<>(purchaseList, p -> true);
         tableView.setItems(filteredData);
 
+
+        bosTarixCol.setVisible(false);
+        doluCol.setVisible(false);
+        bosCol.setVisible(false);
+        kiseCol.setVisible(false);
+        birKiseCol.setVisible(false);
+        paletCol.setVisible(false);
+        birPaletCol.setVisible(false);
         Button btnYeni = new Button("Yeni");
         Button btnSil = new Button("Sil");
         Button btnTarix = new Button("Alış Tarixi");
@@ -1522,16 +1538,22 @@ public class HelloApplication extends Application {
                         .setHeight(40);
                 table.addCell(standaloneTitle);
                 cellsAdded.addAndGet(5);
-
+                String mehsulNovu = "Qabığlı Fındıq alısı";
+                if (p.getRegionBag().equalsIgnoreCase("LA")){
+                    mehsulNovu = "Ləpə alışı";
+                }
+                else if(p.getRegionBag().equalsIgnoreCase("QS")){
+                    mehsulNovu = "Qabığ satışı";
+                }
                 List<String> titles = Arrays.asList(
-                        "Məhsul novü", "Lot nomrəsi", "Nəqliyyat nomrəsi","Məntəqə","Kisə sayı","Tarix", "Dolu Çəki","Boş Çəki", "Net Çəki", "Bir Kisənin Çəkisi (q)"
+                        "Məhsul novü", "Lot nomrəsi", "Nəqliyyat nomrəsi","Məntəqə","Tarix","Net Çəki", "Dolu Çəki","Boş Çəki","Kisə sayı", "Bir Kisənin Çəkisi (q)"
 
                 );
 
                 List<String> values = Arrays.asList(
-                        "Qabığlı Fındıq alısı", p.getLotNomresi(), p.getNeqliyyatNomresi(),
-                        p.getMenteqe(),String.valueOf(p.getKiseSayi()),p.getDoluTarix() != null ? p.getDoluTarix().format(formatter) : "-",
-                        trimZeros(p.getDoluCeki()), trimZeros(p.getBosCeki()), trimZeros(p.getNetCeki()),trimZeros(p.getBirPaletinCekisi()), trimZeros(p.getBirKiseninCekisi())
+                        mehsulNovu, p.getLotNomresi(), p.getNeqliyyatNomresi(),
+                        p.getMenteqe(),p.getDoluTarix() != null ? p.getDoluTarix().format(formatter) : "-", trimZeros(p.getNetCeki()),
+                        trimZeros(p.getDoluCeki()), trimZeros(p.getBosCeki()),String.valueOf(p.getKiseSayi()),trimZeros(p.getBirPaletinCekisi()), trimZeros(p.getBirKiseninCekisi())
                 );
 
                 int index = 0;

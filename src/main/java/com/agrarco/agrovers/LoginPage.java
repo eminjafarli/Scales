@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class LoginPage extends Application {
 
@@ -35,10 +36,9 @@ public class LoginPage extends Application {
     public void start(Stage stage) {
         this.loginStage = stage;
 
-        // ---------- Root Layout ----------
+        loginStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("agrarco.png"))));
         BorderPane rootLayout = new BorderPane();
 
-        // ---------- Left Panel (Login Form) ----------
         VBox formBox = new VBox(18);
         formBox.setAlignment(Pos.CENTER);
         formBox.setPadding(new Insets(40));
@@ -47,10 +47,10 @@ public class LoginPage extends Application {
         formBox.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.05)));
 
         ImageView logo = new ImageView(new Image(getClass().getResource("agrarco.png").toExternalForm()));
-        logo.setFitWidth(80); // small size
+        logo.setFitWidth(80);
         logo.setPreserveRatio(true);
 
-        Label title = new Label("Xoş Gəlmisiniz 👋");
+        Label title = new Label("Xoş Gəlmisiniz");
         title.setFont(Font.font("Arial", 28));
         title.setTextFill(Color.web("#333"));
 
@@ -68,7 +68,70 @@ public class LoginPage extends Application {
         passwordField.setPromptText("Şifrə");
         passwordField.setFont(Font.font(15));
         passwordField.setPrefWidth(280);
-        passwordField.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 10;");
+        passwordField.setStyle("""
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 35 10 10;
+""");
+
+        TextField visiblePasswordField = new TextField();
+        visiblePasswordField.setPromptText("Şifrə");
+        visiblePasswordField.setFont(Font.font(15));
+        visiblePasswordField.setPrefWidth(280);
+        visiblePasswordField.setStyle("""
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 35 10 10;
+""");
+        visiblePasswordField.setVisible(false);
+        visiblePasswordField.setManaged(false);
+
+
+        visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());
+
+        javafx.scene.image.Image eyeOpen = new javafx.scene.image.Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("eye.png"))
+        );
+        javafx.scene.image.Image eyeClosed = new javafx.scene.image.Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("eye-off.png"))
+        );
+
+        javafx.scene.control.Button eyeButton = new javafx.scene.control.Button();
+        eyeButton.setGraphic(new javafx.scene.image.ImageView(eyeOpen));
+        eyeButton.setStyle("""
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+""");
+        eyeButton.setFocusTraversable(false);
+
+        StackPane eyePane = new StackPane(eyeButton);
+        eyePane.setAlignment(Pos.CENTER_RIGHT);
+        eyePane.setPadding(new Insets(0, 10, 0, 0));
+
+        StackPane passwordStack = new StackPane(passwordField, visiblePasswordField, eyePane);
+
+        eyeButton.setOnAction(e -> {
+            boolean showing = visiblePasswordField.isVisible();
+            if (showing) {
+                visiblePasswordField.setVisible(false);
+                visiblePasswordField.setManaged(false);
+                passwordField.setVisible(true);
+                passwordField.setManaged(true);
+                passwordField.requestFocus();
+                passwordField.positionCaret(passwordField.getText().length());
+                ((javafx.scene.image.ImageView) eyeButton.getGraphic()).setImage(eyeOpen);
+            } else {
+                visiblePasswordField.setVisible(true);
+                visiblePasswordField.setManaged(true);
+                passwordField.setVisible(false);
+                passwordField.setManaged(false);
+                visiblePasswordField.requestFocus();
+                visiblePasswordField.positionCaret(visiblePasswordField.getText().length());
+                ((javafx.scene.image.ImageView) eyeButton.getGraphic()).setImage(eyeClosed);
+            }
+        });
+
 
         Button loginButton = new Button("Daxil ol");
         loginButton.setPrefWidth(200);
@@ -95,9 +158,8 @@ public class LoginPage extends Application {
                 -fx-cursor: hand;
                 """));
 
-        formBox.getChildren().addAll(logo,title, subtitle, usernameField, passwordField, loginButton);
+        formBox.getChildren().addAll(logo,title, subtitle, usernameField, passwordStack, loginButton);
 
-        // Slide-in animation for form
         formBox.setTranslateX(-100);
         FadeTransition fadeInForm = new FadeTransition(Duration.millis(800), formBox);
         fadeInForm.setFromValue(0);
@@ -108,10 +170,8 @@ public class LoginPage extends Application {
         fadeInForm.play();
         slideForm.play();
 
-        // ---------- Right Panel (Image Section) ----------
         StackPane imagePane = new StackPane();
 
-        // ✅ Load image safely (with fallback)
         ImageView background;
         try {
             URL imageUrl = getClass().getResource("img.png");
@@ -132,13 +192,11 @@ public class LoginPage extends Application {
         background.setFitWidth(Screen.getPrimary().getVisualBounds().getWidth() * 0.75);
         background.setOpacity(0);
 
-        // Fade in animation for image
         FadeTransition fadeImage = new FadeTransition(Duration.millis(1200), background);
         fadeImage.setFromValue(0);
         fadeImage.setToValue(1);
         fadeImage.play();
 
-        // ✅ Changed overlay text
         Label overlayText = new Label("AGRARCO TƏRƏZİ OPERATORU");
         overlayText.setFont(Font.font("Arial", 34));
         overlayText.setTextFill(Color.WHITE);
@@ -150,7 +208,6 @@ public class LoginPage extends Application {
         overlay.setStyle("-fx-background-color: rgba(0,0,0,0.4);");
         imagePane.getChildren().addAll(background, overlay);
 
-        // ---------- Combine Left & Right ----------
         HBox mainContainer = new HBox();
         mainContainer.getChildren().addAll(formBox, imagePane);
         HBox.setHgrow(imagePane, Priority.ALWAYS);
@@ -164,7 +221,6 @@ public class LoginPage extends Application {
         StackPane.setAlignment(notificationBox, Pos.TOP_CENTER);
         StackPane.setMargin(notificationBox, new Insets(30, 0, 0, 0));
 
-        // ---------- Events ----------
         usernameField.setOnAction(e -> passwordField.requestFocus());
         passwordField.setOnAction(e -> loginButton.fire());
 
@@ -182,14 +238,13 @@ public class LoginPage extends Application {
             }
         });
 
-        // ---------- Scene & Stage ----------
         Scene scene = new Scene(mainStack,
                 Screen.getPrimary().getVisualBounds().getWidth(),
                 Screen.getPrimary().getVisualBounds().getHeight());
 
         stage.setTitle("Agrarco | Giriş");
         stage.setScene(scene);
-        stage.setMaximized(true); // ✅ Fullscreen mode
+        stage.setMaximized(true);
         stage.show();
     }
 

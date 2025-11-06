@@ -23,7 +23,6 @@ public class MiniPurchaseTable {
 
         miniTable.setEditable(false);
 
-        // --- Table Columns ---
         TableColumn<MiniPurchase, LocalDateTime> colTarix = new TableColumn<>("Tarix");
         colTarix.setCellValueFactory(new PropertyValueFactory<>("Tarix"));
         colTarix.setCellFactory(column -> new TableCell<>() {
@@ -50,7 +49,6 @@ public class MiniPurchaseTable {
         TableColumn<MiniPurchase, Double> colBirPalet = new TableColumn<>("Bir paletin çəkisi");
         colBirPalet.setCellValueFactory(new PropertyValueFactory<>("BirPaletinSayi"));
 
-        // --- Delete Button Column ---
         TableColumn<MiniPurchase, Void> colDelete = new TableColumn<>("Ləğv et");
         colDelete.setCellFactory(param -> new TableCell<>() {
             private final Button deleteBtn = new Button("Ləğv et");
@@ -68,20 +66,18 @@ public class MiniPurchaseTable {
             }
         });
 
-        // --- Add Columns ---
         miniTable.getColumns().addAll(colTarix, colCeki, colKise, colBirKise, colPalet, colBirPalet, colDelete);
         miniTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // --- “Əlavə et” Button ---
         Button btnAdd = new Button("Əlavə et");
         btnAdd.setStyle("-fx-background-color: #5cb85c; -fx-text-fill: white;");
         btnAdd.setOnAction(event -> {
             try {
-                // ✅ Create a new MiniPurchase using the current date/time, with nanoseconds stripped
+
                 MiniPurchase newMini = new MiniPurchase(
-                        0,               // id
-                        0,               // purchaseId, will set later
-                        LocalDateTime.now().withNano(0), // <-- strip nanoseconds here
+                        0,
+                        0,
+                        LocalDateTime.now().withNano(0),
                         Double.parseDouble(doluCekiManual.getText()),
                         Integer.parseInt(kiseSayiField.getText()),
                         Double.parseDouble(birKiseField.getText()),
@@ -108,7 +104,7 @@ public class MiniPurchaseTable {
             }
         });
 
-        // --- Layout ---
+
         VBox box = new VBox(10, btnAdd, miniTable);
         box.setStyle("-fx-padding: 10;");
         return box;
